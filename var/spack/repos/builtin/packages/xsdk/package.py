@@ -79,7 +79,7 @@ class Xsdk(BundlePackage):
     depends_on('datatransferkit@master', when='@develop +trilinos +datatransferkit')
     depends_on('datatransferkit@3.1-rc2', when='@0.6.0 +trilinos +datatransferkit')
 
-    depends_on('petsc +trilinos', when='+trilinos')
+    depends_on('petsc +trilinos', when='+trilinos @:0.6.0')
     depends_on('petsc +cuda', when='+cuda @0.6.0:')
     depends_on('petsc +batch', when='platform=cray @0.5.0:')
     depends_on('petsc@main+mpi+hypre+superlu-dist+metis+hdf5~mumps+double~int64',
@@ -118,7 +118,7 @@ class Xsdk(BundlePackage):
 
     depends_on('sundials +cuda', when='+cuda @0.6.0:')
     depends_on('sundials +trilinos', when='+trilinos @0.6.0:')
-    depends_on('sundials@develop~int64+hypre+petsc+superlu-dist', when='@develop')
+    depends_on('sundials@develop~int64+hypre+petsc~superlu-dist', when='@develop')
     depends_on('sundials@5.5.0~int64+hypre+petsc+superlu-dist', when='@0.6.0')
     depends_on('sundials@5.0.0~int64+hypre+petsc+superlu-dist', when='@0.5.0')
     depends_on('sundials@3.2.1~int64+hypre', when='@0.4.0')
