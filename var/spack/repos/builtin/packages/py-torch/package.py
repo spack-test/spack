@@ -14,7 +14,7 @@ class PyTorch(PythonPackage, CudaPackage):
     homepage = "https://pytorch.org/"
     git      = "https://github.com/pytorch/pytorch.git"
 
-    maintainers = ['adamjstewart']
+    maintainers = ['adamjstewart', 'tgtestuser', 'tgamblin']
 
     # Exact set of modules is version- and variant-specific, just attempt to import the
     # core libraries to ensure that the package was successfully installed.
