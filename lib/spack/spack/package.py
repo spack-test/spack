@@ -8,8 +8,8 @@
 The spack package class structure is based strongly on Homebrew
 (http://brew.sh/), mainly because Homebrew makes it very easy to create
 packages.
-
 """
+
 import base64
 import collections
 import contextlib
@@ -25,12 +25,16 @@ import sys
 import textwrap
 import time
 import traceback
-import six
 import types
-from typing import Optional, List, Dict, Any, Callable  # novm
+from typing import Any, Callable, Dict, List, Optional  # novm
+
+import six
+from ordereddict_backport import OrderedDict
 
 import llnl.util.filesystem as fsys
 import llnl.util.tty as tty
+from llnl.util.lang import memoized
+from llnl.util.link_tree import LinkTree
 
 import spack.compilers
 import spack.config
@@ -49,16 +53,13 @@ import spack.store
 import spack.url
 import spack.util.environment
 import spack.util.web
-from llnl.util.lang import memoized
-from llnl.util.link_tree import LinkTree
-from ordereddict_backport import OrderedDict
 from spack.filesystem_view import YamlFilesystemView
-from spack.installer import PackageInstaller, InstallError
 from spack.install_test import TestFailure, TestSuite
-from spack.util.executable import which, ProcessError
-from spack.util.prefix import Prefix
-from spack.stage import stage_prefix, Stage, ResourceStage, StageComposite
+from spack.installer import InstallError, PackageInstaller
+from spack.stage import ResourceStage, Stage, StageComposite, stage_prefix
+from spack.util.executable import ProcessError, which
 from spack.util.package_hash import package_hash
+from spack.util.prefix import Prefix
 from spack.version import Version
 
 """Allowed URL schemes for spack packages."""
@@ -1833,6 +1834,7 @@ class PackageBase(six.with_metaclass(PackageMeta, PackageViewMixin, object)):
                 exc_type, _, tb = sys.exc_info()
                 print('FAILED: {0}'.format(e))
                 import traceback
+
                 # remove the current call frame to exclude the extract_stack
                 # call from the error
                 stack = traceback.extract_stack()[:-1]

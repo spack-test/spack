@@ -33,15 +33,18 @@ import heapq
 import itertools
 import os
 import shutil
-import six
 import sys
 import time
-
 from collections import defaultdict
+
+import six
 
 import llnl.util.filesystem as fs
 import llnl.util.lock as lk
 import llnl.util.tty as tty
+from llnl.util.tty.color import colorize
+from llnl.util.tty.log import log_output
+
 import spack.binary_distribution as binary_distribution
 import spack.compilers
 import spack.error
@@ -51,9 +54,6 @@ import spack.package
 import spack.package_prefs as prefs
 import spack.repo
 import spack.store
-
-from llnl.util.tty.color import colorize
-from llnl.util.tty.log import log_output
 from spack.util.environment import dump_environment
 from spack.util.executable import which
 from spack.util.timer import Timer
@@ -814,24 +814,29 @@ class PackageInstaller(object):
         # Determine if the spec is flagged as installed in the database
         rec, installed_in_db = self._check_db(task.pkg.spec)
 
-        # Make sure the installation directory is in the desired state
-        # for uninstalled specs.
-        partial = False
-        if not installed_in_db and os.path.isdir(task.pkg.spec.prefix):
-            if not keep_prefix:
-                task.pkg.remove_prefix()
-            else:
-                tty.debug('{0} is partially installed'
-                          .format(task.pkg_id))
-                partial = True
+        if not installed_in_db:
+            # Ensure there is no other installed spec with the same prefix dir
+            if spack.store.db.is_occupied_install_prefix(task.pkg.spec.prefix):
+                raise InstallError(
+                    "Install prefix collision for {0}".format(task.pkg_id),
+                    long_msg="Prefix directory {0} already used by another "
+                             "installed spec.".format(task.pkg.spec.prefix))
+
+            # Make sure the installation directory is in the desired state
+            # for uninstalled specs.
+            if os.path.isdir(task.pkg.spec.prefix):
+                if not keep_prefix:
+                    task.pkg.remove_prefix()
+                else:
+                    tty.debug('{0} is partially installed'.format(task.pkg_id))
 
         # Destroy the stage for a locally installed, non-DIYStage, package
         if restage and task.pkg.stage.managed_by_spack:
             task.pkg.stage.destroy()
 
-        if not partial and self.layout.check_installed(task.pkg.spec) and (
-                rec.spec.dag_hash() not in task.request.overwrite or
-                rec.installation_time > task.request.overwrite_time
+        if installed_in_db and (
+            rec.spec.dag_hash() not in task.request.overwrite or
+            rec.installation_time > task.request.overwrite_time
         ):
             self._update_installed(task)
 
@@ -1613,6 +1618,7 @@ class PackageInstaller(object):
                 # package as a failure.
                 if (not isinstance(exc, spack.error.SpackError) or
                     not exc.printed):
+                    exc.printed = True
                     # SpackErrors can be printed by the build process or at
                     # lower levels -- skip printing if already printed.
                     # TODO: sort out this and SpackError.print_context()
@@ -1686,6 +1692,12 @@ def build_process(pkg, kwargs):
     verbose = kwargs.get('verbose', False)
 
     timer = Timer()
+
+    # If we are using a padded path, filter the output to compress padded paths
+    # The real log still has full-length paths.
+    filter_padding = spack.config.get("config:install_tree:padded_length", None)
+    filter_fn = spack.util.path.padding_filter if filter_padding else None
+
     if not fake:
         if not skip_patch:
             pkg.do_patch()
@@ -1758,8 +1770,10 @@ def build_process(pkg, kwargs):
                     try:
                         # DEBUGGING TIP - to debug this section, insert an IPython
                         # embed here, and run the sections below without log capture
-                        with log_output(log_file, echo, True,
-                                        env=unmodified_env) as logger:
+                        with log_output(
+                                log_file, echo, True, env=unmodified_env,
+                                filter_fn=filter_fn
+                        ) as logger:
 
                             with logger.force_echo():
                                 inner_debug_level = tty.debug_level()
