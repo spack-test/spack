@@ -3,15 +3,15 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-import zipfile
-import tempfile
-import stat
-import shutil
-import re
-import os
-import json
-import copy
 import base64
+import copy
+import json
+import os
+import re
+import shutil
+import stat
+import tempfile
+import zipfile
 
 from six import iteritems
 from six.moves.urllib.error import HTTPError, URLError
