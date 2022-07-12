@@ -9,7 +9,7 @@
 Pipelines
 =========
 
-Pipelines really are pretty great.
+Pipelines really are rather great.
 
 Spack provides commands that support generating and running automated build
 pipelines designed for Gitlab CI.  At the highest level it works like this:
