@@ -110,7 +110,7 @@ class ArmplGcc(Package):
     homepage = "https://developer.arm.com/tools-and-software/server-and-hpc/downloads/arm-performance-libraries"
     url = "https://developer.arm.com/-/media/Files/downloads/hpc/arm-performance-libraries/22-0-2/RHEL7/arm-performance-libraries_22.0.2_RHEL-7_gcc-11.2.tar"
 
-    maintainers = ["annop-w"]
+    maintainers = ["me", "annop-w"]
 
     for ver, packages in _versions.items():
         key = "{0}".format(get_os())

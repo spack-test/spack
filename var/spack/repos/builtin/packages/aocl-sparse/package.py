@@ -18,7 +18,7 @@ class AoclSparse(CMakePackage):
     url = "https://github.com/amd/aocl-sparse/archive/3.0.tar.gz"
     git = "https://github.com/amd/aocl-sparse.git"
 
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     version("3.2", sha256="db7d681a8697d6ef49acf3e97e8bec35b048ce0ad74549c3b738bbdff496618f")
     version("3.1", sha256="8536f06095c95074d4297a3d2910654085dd91bce82e116c10368a9f87e9c7b9")

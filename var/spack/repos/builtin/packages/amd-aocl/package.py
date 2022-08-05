@@ -15,7 +15,7 @@ class AmdAocl(BundlePackage):
 
     homepage = "https://developer.amd.com/amd-aocl/"
 
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     version("3.2")
     version("3.1")

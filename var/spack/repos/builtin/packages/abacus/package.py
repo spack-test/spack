@@ -15,7 +15,7 @@ class Abacus(MakefilePackage):
     for large-scale electronic-structure simulations
     from first principles"""
 
-    maintainers = ["bitllion"]
+    maintainers = ["me", "bitllion"]
 
     homepage = "http://abacus.ustc.edu.cn/"
     git = "https://github.com/abacusmodeling/abacus-develop.git"

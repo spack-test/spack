@@ -18,7 +18,7 @@ class Amdlibm(SConsPackage):
 
     homepage = "https://developer.amd.com/amd-aocl/amd-math-library-libm/"
     git = "https://github.com/amd/aocl-libm-ose.git"
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     # If a user who doesn't specify a version
     # amdlibm installed for commit ID:4033e02

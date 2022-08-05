@@ -14,7 +14,7 @@ class Aml(AutotoolsPackage):
     homepage = "https://argo-aml.readthedocs.io/"
     url = "https://www.mcs.anl.gov/research/projects/argo/downloads/aml-0.1.0.tar.gz"
     git = "https://github.com/anlsys/aml.git"
-    maintainers = ["perarnau"]
+    maintainers = ["me", "perarnau"]
 
     test_requires_compiler = True
 

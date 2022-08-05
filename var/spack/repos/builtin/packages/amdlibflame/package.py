@@ -35,7 +35,7 @@ class Amdlibflame(LibflameBase):
     url = "https://github.com/amd/libflame/archive/3.0.tar.gz"
     git = "https://github.com/amd/libflame.git"
 
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     version("3.2", sha256="6b5337fb668b82d0ed0a4ab4b5af4e2f72e4cedbeeb4a8b6eb9a3ef057fb749a")
     version("3.1", sha256="4520fb93fcc89161f65a40810cae0fa1f87cecb242da4a69655f502545a53426")

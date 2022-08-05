@@ -13,7 +13,7 @@ class AmrWind(CMakePackage, CudaPackage, ROCmPackage):
     homepage = "https://github.com/Exawind/amr-wind"
     git = "https://github.com/Exawind/amr-wind.git"
 
-    maintainers = ["jrood-nrel"]
+    maintainers = ["me", "jrood-nrel"]
 
     tags = ["ecp", "ecp-apps"]
 

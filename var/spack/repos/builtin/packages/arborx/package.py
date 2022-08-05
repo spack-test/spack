@@ -15,7 +15,7 @@ class Arborx(CMakePackage, CudaPackage, ROCmPackage):
 
     tags = ["e4s", "ecp"]
 
-    maintainers = ["aprokop"]
+    maintainers = ["me", "aprokop"]
 
     version("master", branch="master")
     version("1.2", sha256="ed1939110b2330b7994dcbba649b100c241a2353ed2624e627a200a398096c20")

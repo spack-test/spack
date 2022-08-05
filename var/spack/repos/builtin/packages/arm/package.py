@@ -63,7 +63,7 @@ class Arm(Package):
     homepage = "https://developer.arm.com/tools-and-software/server-and-hpc/arm-allinea-studio"
     url = "https://developer.arm.com/-/media/Files/downloads/hpc/arm-allinea-studio/20-2-1/Ubuntu16.04/arm-compiler-for-linux_20.2.1_Ubuntu-16.04_aarch64.tar"
 
-    maintainers = ["OliverPerks"]
+    maintainers = ["me", "OliverPerks"]
 
     # Build Versions: establish OS for URL
     acfl_os = get_os()

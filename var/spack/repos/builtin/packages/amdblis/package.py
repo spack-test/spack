@@ -21,7 +21,7 @@ class Amdblis(BlisBase):
     url = "https://github.com/amd/blis/archive/3.0.tar.gz"
     git = "https://github.com/amd/blis.git"
 
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     version("3.2", sha256="5a400ee4fc324e224e12f73cc37b915a00f92b400443b15ce3350278ad46fff6")
     version("3.1", sha256="2891948925b9db99eec02a1917d9887a7bee9ad2afc5421c9ba58602a620f2bf")

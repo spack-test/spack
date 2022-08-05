@@ -13,7 +13,7 @@ class Arbor(CMakePackage, CudaPackage):
     homepage = "https://arbor-sim.org"
     git = "https://github.com/arbor-sim/arbor.git"
     url = "https://github.com/arbor-sim/arbor/releases/download/v0.7/arbor-v0.7-full.tar.gz"
-    maintainers = ["bcumming", "brenthuisman", "haampie", "schmitts"]
+    maintainers = ["me", "bcumming", "brenthuisman", "haampie", "schmitts"]
 
     version("master", branch="master", submodules=True)
     version(

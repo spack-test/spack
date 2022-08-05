@@ -12,7 +12,7 @@ class ActsDd4hep(CMakePackage):
     homepage = "https://github.com/acts-project/acts-dd4hep"
     url = "https://github.com/acts-project/acts-dd4hep/archive/refs/tags/v1.0.0.tar.gz"
 
-    maintainers = ["HadrianG2", "wdconinc"]
+    maintainers = ["me", "HadrianG2", "wdconinc"]
 
     version("1.0.0", sha256="991f996944c88efa837880f919239e50d12c5c9361e220bc9422438dd608308c")
 

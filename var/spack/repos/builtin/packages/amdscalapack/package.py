@@ -22,7 +22,7 @@ class Amdscalapack(ScalapackBase):
     homepage = "https://developer.amd.com/amd-aocl/scalapack/"
     git = "https://github.com/amd/scalapack.git"
 
-    maintainers = ["amd-toolchain-support"]
+    maintainers = ["me", "amd-toolchain-support"]
 
     version("3.2", sha256="9e00979bb1be39d627bdacb01774bc043029840d542fafc934d16fec3e3b0892")
     version("3.1", sha256="4c2ee2c44644a0feec0c6fc1b1a413fa9028f14d7035d43a398f5afcfdbacb98")
