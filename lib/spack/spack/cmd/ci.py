@@ -285,6 +285,7 @@ def ci_rebuild(args):
     spack_pipeline_type = get_env_var("SPACK_PIPELINE_TYPE")
     remote_mirror_override = get_env_var("SPACK_REMOTE_MIRROR_OVERRIDE")
     remote_mirror_url = get_env_var("SPACK_REMOTE_MIRROR_URL")
+    check_updated = get_env_var("SPACK_REBUILD_CHECK_UP_TO_DATE")
 
     # Construct absolute paths relative to current $CI_PROJECT_DIR
     ci_project_dir = get_env_var("CI_PROJECT_DIR")
@@ -470,7 +471,8 @@ def ci_rebuild(args):
         # pipeline_mirror_url), which is also what we want.
         spack.mirror.add("mirror_override", remote_mirror_override, cfg.default_modify_scope())
 
-    matches = bindist.get_mirrors_for_spec(
+    check_matches = True if check_updated and check_updated.lower() == "true" else False
+    matches = None if not check_matches else bindist.get_mirrors_for_spec(
         job_spec, mirrors_to_check=mirrors_to_check, index_only=False
     )
 
@@ -508,6 +510,8 @@ def ci_rebuild(args):
             "install",
             "--show-log-on-error",  # Print full log on fails
             "--keep-stage",
+            # Uncomment once #32537 is merged
+            # "--use-buildcache dependencies:only,packages:never",
         ]
     )
 
