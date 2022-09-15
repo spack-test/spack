@@ -34,6 +34,9 @@ class Mpileaks(AutotoolsPackage):
             "--with-callpath={0}".format(self.spec["callpath"].prefix),
         ]
 
+        if "+nonexistentvariant" in self.spec:
+            args.extend(["--use-not-existent-option"])
+
         if stackstart:
             args.extend(
                 [
