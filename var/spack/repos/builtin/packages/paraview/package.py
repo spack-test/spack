@@ -73,6 +73,9 @@ class Paraview(CMakePackage, CudaPackage):
     variant("pagosa", default=False, description="Build the pagosa adaptor")
     variant("eyedomelighting", default=False, description="Enable Eye Dome Lighting feature")
     variant("adios2", default=False, description="Enable ADIOS2 support", when="@5.8:")
+    variant("gdal", default=False, description="Enable GDAL support")
+    variant("smtk_extensions", default=False, description="Enable components required by CMB/SMTK")
+    variant("visitbridge", default=False, description="Enable VisItBridge Support")
 
     variant(
         "advanced_debug",
@@ -97,6 +100,7 @@ class Paraview(CMakePackage, CudaPackage):
         ' "on" or "off" will always override the build_edition.',
     )
 
+    conflicts("~hdf5", when="+visitbridge")
     conflicts("+adios2", when="@:5.10 ~mpi")
     conflicts("+python", when="+python3")
     # Python 2 support dropped with 5.9.0
@@ -185,13 +189,16 @@ class Paraview(CMakePackage, CudaPackage):
     depends_on("expat")
     depends_on("eigen@3:")
     depends_on("freetype")
-    # depends_on('hdf5+mpi', when='+mpi')
-    # depends_on('hdf5~mpi', when='~mpi')
+    depends_on("gdal@3.5.1", when="+gdal")
     depends_on("hdf5+hl+mpi", when="+hdf5+mpi")
     depends_on("hdf5+hl~mpi", when="+hdf5~mpi")
     depends_on("hdf5@1.10:", when="+hdf5 @5.10:")
     depends_on("adios2+mpi", when="+adios2+mpi")
     depends_on("adios2~mpi", when="+adios2~mpi")
+    depends_on("silo", when="+visitbridge")
+    depends_on("silo+mpi", when="+visitbridge+mpi")
+    depends_on("silo~mpi", when="+visitbridge~mpi")
+    depends_on("boost", when="+visitbridge")
     depends_on("jpeg")
     depends_on("jsoncpp")
     depends_on("libogg")
@@ -573,5 +580,38 @@ class Paraview(CMakePackage, CudaPackage):
 
         if "+advanced_debug" in spec:
             cmake_args.append("-DVTK_DEBUG_LEAKS:BOOL=ON")
+
+        if "+gdal" in spec:
+            cmake_args.extend(
+                [
+                    self.define("PARAVIEW_ENABLE_GDAL", "YES"),
+                ]
+            )
+            # SMTK needs geovis to enable gdal
+            if "+smtk_extensions" in spec:
+                cmake_args.extend(
+                    [
+                        self.define("VTK_MODULE_ENABLE_VTK_GeovisCore", "YES"),
+                    ]
+                )
+
+        if "+smtk_extensions" in spec:
+            cmake_args.extend(
+                [
+                    self.define("VTK_MODULE_ENABLE_VTK_ViewsInfovis", "YES"),
+                    self.define("VTK_MODULE_ENABLE_VTK_RenderingGL2PSOpenGL2", "YES"),
+                    self.define("VTK_MODULE_ENABLE_VTK_DomainsChemistryOpenGL2", "YES"),
+                    self.define("PARAVIEW_BUILD_LEGACY_REMOVE", "OFF"),
+                    self.define("PARAVIEW_UNIFIED_INSTALL_TREE", "OFF"),
+                ]
+            )
+
+        if "+visitbridge" in spec:
+            cmake_args.extend(
+                [
+                    self.define("PARAVIEW_ENABLE_VISITBRIDGE", "ON"),
+                    self.define("VISIT_BUILD_READER_Silo", "ON"),
+                ]
+            )
 
         return cmake_args
