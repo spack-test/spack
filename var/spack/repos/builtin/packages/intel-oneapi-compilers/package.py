@@ -5,10 +5,22 @@
 
 import platform
 
+import spack.compilers
 from spack.build_environment import dso_suffix
 from spack.package import *
 
 linux_versions = [
+    {
+        "version": "2022.2.0",
+        "cpp": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/irc_nas/18849/l_dpcpp-cpp-compiler_p_2022.2.0.8772_offline.sh",
+            "sha256": "8ca97f7ea8abf7876df6e10ce2789ea8cbc310c100ad7bf0b5ffccc4f3c7f2c9",
+        },
+        "ftn": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/irc_nas/18909/l_fortran-compiler_p_2022.2.0.8773_offline.sh",
+            "sha256": "4054e4bf5146d55638d21612396a19ea623d22cbb8ac63c0a7150773541e0311",
+        },
+    },
     {
         "version": "2022.1.0",
         "cpp": {
@@ -102,6 +114,15 @@ class IntelOneapiCompilers(IntelOneApiPackage):
 
     depends_on("patchelf", type="build")
 
+    # TODO: effectively gcc is a direct dependency of intel-oneapi-compilers, but we
+    # cannot express that properly. For now, add conflicts for non-gcc compilers
+    # instead.
+    for __compiler in spack.compilers.supported_compilers():
+        if __compiler != "gcc":
+            conflicts(
+                "%{0}".format(__compiler), msg="intel-oneapi-compilers must be installed with %gcc"
+            )
+
     if platform.system() == "Linux":
         for v in linux_versions:
             version(v["version"], expand=False, **v["cpp"])
@@ -130,10 +151,10 @@ class IntelOneapiCompilers(IntelOneApiPackage):
         """
         super(IntelOneapiCompilers, self).setup_run_environment(env)
 
-        env.set("CC", self.component_prefix.bin.icx)
-        env.set("CXX", self.component_prefix.bin.icpx)
-        env.set("F77", self.component_prefix.bin.ifx)
-        env.set("FC", self.component_prefix.bin.ifx)
+        env.set("CC", self.component_prefix.linux.bin.icx)
+        env.set("CXX", self.component_prefix.linux.bin.icpx)
+        env.set("F77", self.component_prefix.linux.bin.ifx)
+        env.set("FC", self.component_prefix.linux.bin.ifx)
 
     def install(self, spec, prefix):
         # Copy instead of install to speed up debugging
@@ -175,7 +196,19 @@ class IntelOneapiCompilers(IntelOneApiPackage):
         # TODO: it is unclear whether we should really use all elements of
         #  _ld_library_path because it looks like the only rpath that needs to be
         #  injected is self.component_prefix.linux.compiler.lib.intel64_lin.
-        flags = " ".join(["-Wl,-rpath,{0}".format(d) for d in self._ld_library_path()])
+        flags_list = ["-Wl,-rpath,{}".format(d) for d in self._ld_library_path()]
+
+        # Older versions trigger -Wunused-command-line-argument warnings whenever
+        # linker flags are passed in preprocessor (-E) or compilation mode (-c).
+        # The cfg flags are treated as command line flags apparently. Newer versions
+        # do not trigger these warnings. In some build systems these warnings can
+        # cause feature detection to fail, so we silence them with -Wno-unused-...
+        if self.spec.version < Version("2022.1.0"):
+            flags_list.append("-Wno-unused-command-line-argument")
+
+        # Make sure that underlying clang gets the right GCC toolchain by default
+        flags_list.append("--gcc-toolchain={}".format(self.compiler.prefix))
+        flags = " ".join(flags_list)
         for cmp in [
             "icx",
             "icpx",

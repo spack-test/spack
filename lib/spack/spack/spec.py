@@ -1548,16 +1548,7 @@ class Spec(object):
 
     @property
     def virtual(self):
-        """Right now, a spec is virtual if no package exists with its name.
-
-        TODO: revisit this -- might need to use a separate namespace and
-        be more explicit about this.
-        Possible idea: just use conventin and make virtual deps all
-        caps, e.g., MPI vs mpi.
-        """
-        # This method can be called while regenerating the provider index
-        # So we turn off using the index to detect virtuals
-        return spack.repo.path.is_virtual(self.name, use_index=False)
+        return spack.repo.path.is_virtual(self.name)
 
     @property
     def concrete(self):
@@ -2627,7 +2618,9 @@ class Spec(object):
            a problem.
         """
         # Make an index of stuff this spec already provides
-        self_index = spack.provider_index.ProviderIndex(self.traverse(), restrict=True)
+        self_index = spack.provider_index.ProviderIndex(
+            repository=spack.repo.path, specs=self.traverse(), restrict=True
+        )
         changed = False
         done = False
 
@@ -3151,7 +3144,7 @@ class Spec(object):
         Raise an exception if there is a conflicting virtual
         dependency already in this spec.
         """
-        assert vdep.virtual
+        assert spack.repo.path.is_virtual_safe(vdep.name), vdep
 
         # note that this defensively copies.
         providers = provider_index.providers_for(vdep)
@@ -3216,16 +3209,18 @@ class Spec(object):
 
         # If it's a virtual dependency, try to find an existing
         # provider in the spec, and merge that.
-        if dep.virtual:
+        if spack.repo.path.is_virtual_safe(dep.name):
             visited.add(dep.name)
             provider = self._find_provider(dep, provider_index)
             if provider:
                 dep = provider
         else:
-            index = spack.provider_index.ProviderIndex([dep], restrict=True)
+            index = spack.provider_index.ProviderIndex(
+                repository=spack.repo.path, specs=[dep], restrict=True
+            )
             items = list(spec_deps.items())
             for name, vspec in items:
-                if not vspec.virtual:
+                if not spack.repo.path.is_virtual_safe(vspec.name):
                     continue
 
                 if index.providers_for(vspec):
@@ -3375,7 +3370,7 @@ class Spec(object):
         # Initialize index of virtual dependency providers if
         # concretize didn't pass us one already
         provider_index = spack.provider_index.ProviderIndex(
-            [s for s in all_spec_deps.values()], restrict=True
+            repository=spack.repo.path, specs=[s for s in all_spec_deps.values()], restrict=True
         )
 
         # traverse the package DAG and fill out dependencies according
@@ -3753,8 +3748,12 @@ class Spec(object):
                 return False
 
         # For virtual dependencies, we need to dig a little deeper.
-        self_index = spack.provider_index.ProviderIndex(self.traverse(), restrict=True)
-        other_index = spack.provider_index.ProviderIndex(other.traverse(), restrict=True)
+        self_index = spack.provider_index.ProviderIndex(
+            repository=spack.repo.path, specs=self.traverse(), restrict=True
+        )
+        other_index = spack.provider_index.ProviderIndex(
+            repository=spack.repo.path, specs=other.traverse(), restrict=True
+        )
 
         # This handles cases where there are already providers for both vpkgs
         if not self_index.satisfies(other_index):
@@ -4056,6 +4055,9 @@ class Spec(object):
         yield self.compiler_flags
         yield self.architecture
 
+        # this is not present on older specs
+        yield getattr(self, "_package_hash", None)
+
     def eq_node(self, other):
         """Equality with another spec, not including dependencies."""
         return (other is not None) and lang.lazy_eq(self._cmp_node, other._cmp_node)
@@ -4064,6 +4066,16 @@ class Spec(object):
         """Lazily yield components of self for comparison."""
         for item in self._cmp_node():
             yield item
+
+        # This needs to be in _cmp_iter so that no specs with different process hashes
+        # are considered the same by `__hash__` or `__eq__`.
+        #
+        # TODO: We should eventually unify the `_cmp_*` methods with `to_node_dict` so
+        # TODO: there aren't two sources of truth, but this needs some thought, since
+        # TODO: they exist for speed.  We should benchmark whether it's really worth
+        # TODO: having two types of hashing now that we use `json` instead of `yaml` for
+        # TODO: spec hashing.
+        yield self.process_hash() if self.concrete else None
 
         def deps():
             for dep in sorted(itertools.chain.from_iterable(self._dependencies.values())):
@@ -4981,7 +4993,7 @@ class LazySpecCache(collections.defaultdict):
 
 
 #: These are possible token types in the spec grammar.
-HASH, DEP, AT, COLON, COMMA, ON, OFF, PCT, EQ, ID, VAL, FILE = range(12)
+HASH, DEP, VER, COLON, COMMA, ON, OFF, PCT, EQ, ID, VAL, FILE = range(12)
 
 #: Regex for fully qualified spec names. (e.g., builtin.hdf5)
 spec_id_re = r"\w[\w.-]*"
@@ -5001,10 +5013,13 @@ class SpecLexer(spack.parse.Lexer):
         )
         super(SpecLexer, self).__init__(
             [
-                (r"\^", lambda scanner, val: self.token(DEP, val)),
-                (r"\@", lambda scanner, val: self.token(AT, val)),
+                (
+                    r"\@([\w.\-]*\s*)*(\s*\=\s*\w[\w.\-]*)?",
+                    lambda scanner, val: self.token(VER, val),
+                ),
                 (r"\:", lambda scanner, val: self.token(COLON, val)),
                 (r"\,", lambda scanner, val: self.token(COMMA, val)),
+                (r"\^", lambda scanner, val: self.token(DEP, val)),
                 (r"\+", lambda scanner, val: self.token(ON, val)),
                 (r"\-", lambda scanner, val: self.token(OFF, val)),
                 (r"\~", lambda scanner, val: self.token(OFF, val)),
@@ -5142,7 +5157,7 @@ class SpecParser(spack.parse.Parser):
                 else:
                     # If the next token can be part of a valid anonymous spec,
                     # create the anonymous spec
-                    if self.next.type in (AT, ON, OFF, PCT):
+                    if self.next.type in (VER, ON, OFF, PCT):
                         # Raise an error if the previous spec is already concrete
                         if specs and specs[-1].concrete:
                             raise RedundantSpecError(specs[-1], "compiler, version, " "or variant")
@@ -5250,7 +5265,7 @@ class SpecParser(spack.parse.Parser):
         spec.name = spec_name
 
         while self.next:
-            if self.accept(AT):
+            if self.accept(VER):
                 vlist = self.version_list()
                 spec._add_versions(vlist)
 
@@ -5268,7 +5283,6 @@ class SpecParser(spack.parse.Parser):
             elif self.accept(ID):
                 self.previous = self.token
                 if self.accept(EQ):
-                    # We're adding a key-value pair to the spec
                     self.expect(VAL)
                     spec._add_flag(self.previous.value, self.token.value)
                     self.previous = None
@@ -5304,16 +5318,24 @@ class SpecParser(spack.parse.Parser):
             return self.token.value
 
     def version(self):
+
         start = None
         end = None
-        if self.accept(ID):
-            start = self.token.value
-            if self.accept(EQ):
-                # This is for versions that are associated with a hash
-                # i.e. @[40 char hash]=version
-                start += self.token.value
-                self.expect(VAL)
-                start += self.token.value
+
+        def str_translate(value):
+            # return None for empty strings since we can end up with `'@'.strip('@')`
+            if not (value and value.strip()):
+                return None
+            else:
+                return value
+
+        if self.token.type is COMMA:
+            # need to increment commas, could be ID or COLON
+            self.accept(ID)
+
+        if self.token.type in (VER, ID):
+            version_spec = self.token.value.lstrip("@")
+            start = str_translate(version_spec)
 
         if self.accept(COLON):
             if self.accept(ID):
@@ -5323,10 +5345,10 @@ class SpecParser(spack.parse.Parser):
                 else:
                     end = self.token.value
         elif start:
-            # No colon, but there was a version.
+            # No colon, but there was a version
             return vn.Version(start)
         else:
-            # No colon and no id: invalid version.
+            # No colon and no id: invalid version
             self.next_token_error("Invalid version specifier")
 
         if start:
@@ -5349,7 +5371,7 @@ class SpecParser(spack.parse.Parser):
         compiler = CompilerSpec.__new__(CompilerSpec)
         compiler.name = self.token.value
         compiler.versions = vn.VersionList()
-        if self.accept(AT):
+        if self.accept(VER):
             vlist = self.version_list()
             compiler._add_versions(vlist)
         else:
