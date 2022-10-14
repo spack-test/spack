@@ -27,7 +27,7 @@ class SmtkRggSession(CMakePackage):
 
     # Dependencies
     depends_on("smtk +paraview +qt")
-    depends_on("boost@1.64.0 +filesystem")
+    depends_on("boost@1.64: +filesystem")
     depends_on("qt +gui")
 
     extends("python", when="+python")
