@@ -9,6 +9,8 @@
 CI Pipelines
 ============
 
+Spack CI pipelines are really great, and they are getting better all the time.
+
 Spack provides commands that support generating and running automated build
 pipelines designed for Gitlab CI.  At the highest level it works like this:
 provide a spack environment describing the set of packages you care about,
