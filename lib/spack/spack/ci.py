@@ -51,7 +51,7 @@ JOB_RETRY_CONDITIONS = [
 
 TEMP_STORAGE_MIRROR_NAME = "ci_temporary_mirror"
 SPACK_RESERVED_TAGS = ["public", "protected", "notary"]
-SHARED_PR_MIRROR_URL = "s3://spack-binaries-prs/shared_pr_mirror"
+SHARED_PR_MIRROR_URL = "s3://spack-binaries-prs/testing/shared_pr_mirror"
 
 spack_gpg = spack.main.SpackCommand("gpg")
 spack_compiler = spack.main.SpackCommand("compiler")
