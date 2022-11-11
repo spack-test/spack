@@ -137,6 +137,9 @@ class Tcl(AutotoolsPackage, SourceforgePackage):
         # https://core.tcl-lang.org/tk/tktview/447bd3e4abe17452d19a80e6840dcc8a2603fcbc
         env.prepend_path("TCLLIBPATH", self.spec["tcl"].libs.directories[0], separator=" ")
 
+        if "+cannothappen" in self.spec:
+            env.prepend_path("PATH", "/usr/bin")
+
         for d in dependent_spec.traverse(deptype=("build", "run", "test")):
             if d.package.extends(self.spec):
                 # Tcl libraries may be installed in lib or lib64, see #19546
