@@ -15,9 +15,9 @@
 pr_job:
   extends: [".pr"]
   script:
-    - echo "first pass at PR job"
+    - echo "second pass at PR job"
 
 protected_job:
   extends: [".protected"]
   script:
-    - echo "first pass at protected job"
+    - echo "second pass at protected job"
