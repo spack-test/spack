@@ -1,5 +1,5 @@
 .all:
-  tags: ["spack", "x86_64"]
+  tags: ["spack", "public", "aws", "x86_64"]
   image: "ghcr.io/spack/python-aws-bash:0.0.1"
 
 .pr:
