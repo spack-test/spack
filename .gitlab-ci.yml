@@ -1,0 +1,23 @@
+.all:
+  tags: ["spack", "x86_64"]
+  image: "ghcr.io/spack/python-aws-bash:0.0.1"
+
+.pr:
+  extends: [".all"]
+  only:
+  - /^pr[\d]+_.*$/
+
+.protected:
+  extends: [".all"]
+  only:
+  - /^main$/
+
+pr_job:
+  extends: [".pr"]
+  script:
+    - echo "first pass at PR job"
+
+protected_job:
+  extends: [".protected"]
+  script:
+    - echo "first pass at protected job"
