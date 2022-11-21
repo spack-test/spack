@@ -17,9 +17,11 @@ pr_job:
   script:
     - echo "third pass at PR job"
     - echo "PR script - v4"
+    - echo "PR script - v5"
 
 protected_job:
   extends: [".protected"]
   script:
     - echo "third pass at protected job"
     - echo "protected script - v4"
+    - echo "protected script - v5"
