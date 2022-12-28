@@ -9,7 +9,6 @@ import copy
 import json
 import os
 import re
-import ruamel.yaml as yaml
 import shutil
 import stat
 import subprocess
@@ -512,7 +511,7 @@ class SpackCI():
         ]
 
 
-        ir = {
+        self.ir = {
             "jobs": {},
             "temporary-storage-url-prefix": self.ci_config.get("temporary-storage-url-prefix",None),
             "enable-artifacts-buildcache": self.ci_config.get("enable-artifacts-buildcache", False),
@@ -522,7 +521,7 @@ class SpackCI():
             "broken-tests-packages": self.ci_config.get("enable-artifacts-buildcache", []),
             "target": self.ci_config.get("target", "gitlab"),
         }
-        jobs = ir["jobs"]
+        jobs = self.ir["jobs"]
 
         for spec, dag_hash in _build_jobs(phases, staged_phases):
             jobs[dag_hash] = self.__init_job(spec)
@@ -551,11 +550,12 @@ class SpackCI():
     def __job_name(name, suffix=""):
         return "{0}-job{1}".format(name, suffix)
 
-    def __apply_submapping(dest, spec, section):
+    def __apply_submapping(self, dest, spec, section):
         matched = False
         only_first = section.get("match_behavior", "first") == "first"
 
         for match_attrs in section["submapping"]:
+            attrs = cfg.InternalConfigScope._process_dict_keyname_overrides(match_attrs)
             for match_string in match_attrs["match"]:
                 if _spec_matches(spec, match_string):
                     matched = True
@@ -621,46 +621,59 @@ class SpackCI():
 
         pipeline_gen = overrides + self.ci_config.get("pipeline-gen", []) + defaults
 
-        for section in pipeline_gen:
-            for section in self.ci_config["pipeline-gen"].reverse():
-                name = self.__is_named(section)
-                has_submapping = "submapping" in section
+        for section in reversed(pipeline_gen):
+            name = self.__is_named(section)
+            has_submapping = "submapping" in section
+            section = cfg.InternalConfigScope._process_dict_keyname_overrides(section)
 
-                if name:
-                    remove_job_name = __job_name(name, suffix="-remove")
-                    merge_job_name = __job_name(name)
-                    do_remove = remove_job_name in section
-                    do_merge = merge_job_name in section
+            if name:
+                remove_job_name = self.__job_name(name, suffix="-remove")
+                merge_job_name = self.__job_name(name)
+                do_remove = remove_job_name in section
+                do_merge = merge_job_name in section
 
-                    def _apply_section(attrs, section):
-                        if do_remove:
-                            attrs = spack.config.remove_yaml(
-                                attrs, section[remove_job_name])
-                        if do_merge:
-                            attrs = spack.config.merge_yaml(
-                                attrs, section[merge_job_name])
+                def _apply_section(attrs, section):
+                    if do_remove:
+                        attrs = spack.config.remove_yaml(
+                            attrs, section[remove_job_name])
+                    if do_merge:
+                        attrs = spack.config.merge_yaml(
+                            attrs, section[merge_job_name])
 
-                    if name == "build":
-                        # Apply attributes to all build jobs
-                        for _, job in jobs.items():
-                            if job["spec"]:
-                                _apply_section(job["attributes"], section)
-                    elif name == "any":
-                        # Apply section attributes too all jobs
-                        for _, job in jobs.items():
-                            _apply_section(job["attributes"], section)
-                    else:
-                        # Apply attributes to named job
-                        _apply_section(job["attributes"], section)
-
-                elif has_submapping:
-                    # Apply section jobs with specs to match
+                if name == "build":
+                    # Apply attributes to all build jobs
                     for _, job in jobs.items():
                         if job["spec"]:
-                            job["attributes"] = self.__apply_submapping(
-                                job["attributes"], job["spec"], section)
-
+                            if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
+                                print("Applyng build")
+                                print("  sec:        ", section)
+                                print("  att:        ", job["attributes"])
+                            _apply_section(job["attributes"], section)
+                            if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
+                                print("  att-merged: ", job["attributes"])
+                elif name == "any":
+                    # Apply section attributes too all jobs
+                    for _, job in jobs.items():
+                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
+                            print("Applyng any")
+                            print("  sec:        ", section)
+                            print("  att:        ", job["attributes"])
+                        _apply_section(job["attributes"], section)
+                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
+                            print("  att-merged: ", job["attributes"])
                 else:
+                    # Apply attributes to named job
+                    _apply_section(jobs[name]["attributes"], section)
+
+            elif has_submapping:
+                # Apply section jobs with specs to match
+                for _, job in jobs.items():
+                    if job["spec"]:
+                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
+                            print("Applyng submapping")
+                            print(job["attributes"], section)
+                        job["attributes"] = self.__apply_submapping(
+                            job["attributes"], job["spec"], section)
 
         return self.ir
 
@@ -717,7 +730,8 @@ def generate_gitlab_ci_yaml(
     if "ci" not in yaml_root:
         tty.die('Environment yaml does not have "ci" section')
 
-    ci_config = yaml_root["ci"]
+    # Get the joined "ci" config with all of the current scopes resolved
+    ci_config = cfg.get("ci")
 
     # Default target is gitlab...and only target is gitlab
     if "target" in ci_config and ci_config["target"] != "gitlab":
@@ -885,7 +899,7 @@ def generate_gitlab_ci_yaml(
     # generation job and the rebuild jobs.  This can happen when gitlab
     # checks out the project into a runner-specific directory, for example,
     # and different runners are picked for generate and rebuild jobs.
-    ci_project_dir = os.environ.get("CI_PROJECT_DIR")
+    ci_project_dir = os.environ.get("CI_PROJECT_DIR", os.getcwd())
     rel_artifacts_root = os.path.relpath(pipeline_artifacts_dir, ci_project_dir)
     rel_concrete_env_dir = os.path.relpath(concrete_env_dir, ci_project_dir)
     rel_job_log_dir = os.path.relpath(job_log_dir, ci_project_dir)
@@ -988,7 +1002,7 @@ def generate_gitlab_ci_yaml(
                         spec_record["needs_rebuild"] = False
                         continue
 
-                runner_attribs = spack_ci_ir[release_spec_dag_hash]["attributes"]
+                runner_attribs = spack_ci_ir["jobs"][release_spec_dag_hash]["attributes"]
 
                 if not runner_attribs:
                     tty.warn("No match found for {0}, skipping it".format(release_spec))
@@ -1304,7 +1318,7 @@ def generate_gitlab_ci_yaml(
             # schedule a job to clean up the temporary storage location
             # associated with this pipeline.
             stage_names.append("cleanup-temp-storage")
-            cleanup_job = copy.deepcopy(spack_ci_ir["cleanup"]["attributes"])
+            cleanup_job = copy.deepcopy(spack_ci_ir["jobs"]["cleanup"]["attributes"])
 
             cleanup_job["stage"] = "cleanup-temp-storage"
             cleanup_job["when"] = "always"
@@ -1321,7 +1335,7 @@ def generate_gitlab_ci_yaml(
         ):
             # External signing: generate a job to check and sign binary pkgs
             stage_names.append("stage-sign-pkgs")
-            signing_job = spack_ci_ir["signing"]["attributes"]
+            signing_job = spack_ci_ir["jobs"]["signing"]["attributes"]
 
             signing_job["stage"] = "stage-sign-pkgs"
             signing_job["when"] = "always"
@@ -1333,7 +1347,7 @@ def generate_gitlab_ci_yaml(
         if rebuild_index_enabled:
             # Add a final job to regenerate the index
             stage_names.append("stage-rebuild-index")
-            final_job = ci_config["reindex"]["attributes"]
+            final_job = spack_ci_ir["jobs"]["reindex"]["attributes"]
 
             index_target_mirror = mirror_urls[0]
             if remote_mirror_override:
@@ -1421,7 +1435,7 @@ def generate_gitlab_ci_yaml(
     else:
         # No jobs were generated
         tty.debug("No specs to rebuild, generating no-op job")
-        noop_job = spack_ci_ir["noop"]["attributes"]
+        noop_job = spack_ci_ir["jobs"]["noop"]["attributes"]
 
         if "script" not in noop_job:
             noop_job["script"] = [
