@@ -727,11 +727,21 @@ def generate_gitlab_ci_yaml(
 
     yaml_root = ev.config_dict(env.yaml)
 
-    if "ci" not in yaml_root:
-        tty.die('Environment yaml does not have "ci" section')
+    # Add config scopes to environment
+    env_includes = yaml_root.get("include", [])
+    env_includes.extend(
+        [s.path for s in cfg.scopes().values()
+                    if type(s) == cfg.ImmutableConfigScope and
+                       s.path not in env_includes])
+    yaml_root["include"] = env_includes
+    with open(os.path.join(env.path,"spack.yaml"), "w") as fd:
+        fd.write(syaml.dump_config(env.yaml, default_flow_style=False))
 
     # Get the joined "ci" config with all of the current scopes resolved
     ci_config = cfg.get("ci")
+
+    if not ci_config:
+        tty.die('Environment yaml does not have "ci" section')
 
     # Default target is gitlab...and only target is gitlab
     if "target" in ci_config and ci_config["target"] != "gitlab":
