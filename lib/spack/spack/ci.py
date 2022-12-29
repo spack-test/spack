@@ -728,14 +728,21 @@ def generate_gitlab_ci_yaml(
     yaml_root = ev.config_dict(env.yaml)
 
     # Add config scopes to environment
-    env_includes = yaml_root.get("include", [])
-    env_includes.extend(
-        [s.path for s in cfg.scopes().values()
-                    if type(s) == cfg.ImmutableConfigScope and
-                       s.path not in env_includes])
-    yaml_root["include"] = env_includes
-    with open(os.path.join(env.path,"spack.yaml"), "w") as fd:
-        fd.write(syaml.dump_config(env.yaml, default_flow_style=False))
+    if True:
+        env_includes = yaml_root.get("include", [])
+        cli_scopes = [os.path.abspath(s.path) for s in cfg.scopes().values()
+            if type(s) == cfg.ImmutableConfigScope and
+               s.path not in env_includes and
+               os.path.exists(s.path)
+        ]
+        include_scopes = []
+        for scope in cli_scopes:
+            if scope not in include_scopes and scope not in env_includes:
+                include_scopes.insert(0, scope)
+        env_includes.extend(include_scopes)
+        yaml_root["include"] = env_includes
+        with open(os.path.join(env.path,"spack.yaml"), "w") as fd:
+            fd.write(syaml.dump_config(env.yaml, default_flow_style=False))
 
     # Get the joined "ci" config with all of the current scopes resolved
     ci_config = cfg.get("ci")
