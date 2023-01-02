@@ -13,6 +13,7 @@ from llnl.util.lang import union_dicts
 import spack.schema.merged
 import spack.schema.packages
 import spack.schema.projections
+import spack.schema.view
 
 #: legal first keys in the schema
 keys = ("spack", "env")
@@ -59,6 +60,8 @@ schema = {
             "properties": union_dicts(
                 # merged configuration scope schemas
                 spack.schema.merged.properties,
+                # view configuration scope schemas
+                spack.schema.view.properties,
                 # extra environment schema properties
                 {
                     "include": {
@@ -91,38 +94,6 @@ schema = {
                         },
                     },
                     "specs": spec_list_schema,
-                    "view": {
-                        "anyOf": [
-                            {"type": "boolean"},
-                            {"type": "string"},
-                            {
-                                "type": "object",
-                                "patternProperties": {
-                                    r"\w+": {
-                                        "required": ["root"],
-                                        "additionalProperties": False,
-                                        "properties": {
-                                            "root": {"type": "string"},
-                                            "link": {
-                                                "type": "string",
-                                                "pattern": "(roots|all|run)",
-                                            },
-                                            "link_type": {"type": "string"},
-                                            "select": {
-                                                "type": "array",
-                                                "items": {"type": "string"},
-                                            },
-                                            "exclude": {
-                                                "type": "array",
-                                                "items": {"type": "string"},
-                                            },
-                                            "projections": projections_scheme,
-                                        },
-                                    }
-                                },
-                            },
-                        ]
-                    },
                 },
             ),
         }

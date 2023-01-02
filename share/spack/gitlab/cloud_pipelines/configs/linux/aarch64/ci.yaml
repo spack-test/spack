@@ -1,0 +1,181 @@
+ci:
+  pipeline-gen:
+  - match_behavior: first
+    submapping:
+    - match:
+      - hipblas
+      - llvm
+      - llvm-amdgpu
+      - pango
+      - paraview
+      build-job:
+        tags: [ "spack", "huge", "aarch64" ]
+        variables:
+          CI_JOB_SIZE: huge
+          KUBERNETES_CPU_REQUEST: 11000m
+          KUBERNETES_MEMORY_REQUEST: 42G
+
+    - match:
+      - cuda
+      - dyninst
+      - gcc
+      - ginkgo
+      - hpx
+      - kokkos-kernels
+      - kokkos-nvcc-wrapper
+      - magma
+      - mfem
+      - mpich
+      - openturns
+      - precice
+      - raja
+      - rocblas
+      - rocsolver
+      - rust
+      - slate
+      - trilinos
+      - umpire
+      - vtk-m
+      - warpx
+      build-job:
+        tags: [ "spack", "large", "aarch64" ]
+        variables:
+          CI_JOB_SIZE: large
+          KUBERNETES_CPU_REQUEST: 8000m
+          KUBERNETES_MEMORY_REQUEST: 12G
+
+    - match:
+      - adios
+      - adios2
+      - amrex
+      - archer
+      - ascent
+      - axom
+      - binutils
+      - blaspp
+      - boost
+      - butterflypack
+      - cabana
+      - caliper
+      - camp
+      - chai
+      - conduit
+      - datatransferkit
+      - faodel
+      - ffmpeg
+      - fftw
+      - fortrilinos
+      - gperftools
+      - gptune
+      - hdf5
+      - heffte
+      - hpctoolkit
+      - hwloc
+      - hypre
+      - kokkos
+      - lammps
+      - lapackpp
+      - legion
+      - libzmq
+      - llvm-openmp-ompt
+      - mbedtls
+      - netlib-scalapack
+      - omega-h
+      - openmpi
+      - openpmd-api
+      - pagmo2
+      - papyrus
+      - parsec
+      - pdt
+      - petsc
+      - pumi
+      - py-ipython-genutils
+      - py-petsc4py
+      - py-scipy
+      - py-statsmodels
+      - py-warlock
+      - py-warpx
+      - pygmo
+      - slepc
+      - slurm
+      - strumpack
+      - sundials
+      - superlu-dist
+      - tasmanian
+      - tau
+      - upcxx
+      - vtk-h
+      - zfp
+      build-job:
+        tags: [ "spack", "medium", "aarch64" ]
+        variables:
+          CI_JOB_SIZE: "medium"
+          KUBERNETES_CPU_REQUEST: "2000m"
+          KUBERNETES_MEMORY_REQUEST: "4G"
+
+    - match:
+      - alsa-lib
+      - ant
+      - antlr
+      - argobots
+      - automake
+      - berkeley-db
+      - bison
+      - blt
+      - cmake
+      - curl
+      - darshan-util
+      - diffutils
+      - exmcutils
+      - expat
+      - flit
+      - freetype
+      - gdbm
+      - gotcha
+      - hpcviewer
+      - jansson
+      - json-c
+      - libbsd
+      - libevent
+      - libjpeg-turbo
+      - libnrm
+      - libpng
+      - libunistring
+      - lua-luaposix
+      - m4
+      - mpfr
+      - ncurses
+      - openblas
+      - openjdk
+      - papi
+      - parallel-netcdf
+      - pcre2
+      - perl-data-dumper
+      - pkgconf
+      - py-alembic
+      - py-idna
+      - py-testpath
+      - qhull
+      - snappy
+      - swig
+      - tar
+      - tcl
+      - texinfo
+      - unzip
+      - util-linux-uuid
+      - util-macros
+      - yaml-cpp
+      - zlib
+      - zstd
+      build-job:
+        tags: [ "spack", "small", "aarch64" ]
+        variables:
+          CI_JOB_SIZE: "small"
+          KUBERNETES_CPU_REQUEST: "500m"
+          KUBERNETES_MEMORY_REQUEST: "500M"
+
+    - match: ["@:"]
+      build-job:
+        tags: ["spack", "aarch64"]
+        variables:
+          CI_JOB_SIZE: "default"

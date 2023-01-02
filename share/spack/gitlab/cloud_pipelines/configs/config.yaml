@@ -1,0 +1,8 @@
+config:
+  build_jobs: 32
+  concretizer: clingo
+  install_tree:
+    #root: /home/software/spack
+    padded_length: 384
+    projections:
+      all: '{architecture}/{compiler.name}-{compiler.version}/{name}-{version}-{hash}'

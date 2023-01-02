@@ -29,7 +29,7 @@ import spack.util.spack_yaml as syaml
 import spack.util.url as url_util
 from spack.schema.buildcache_spec import schema as specfile_schema
 from spack.schema.database_index import schema as db_idx_schema
-from spack.schema.gitlab_ci import schema as gitlab_ci_schema
+from spack.schema.ci import schema as ci_schema
 from spack.spec import CompilerSpec, Spec
 from spack.util.pattern import Bunch
 
@@ -1911,21 +1911,21 @@ def test_ensure_only_one_temporary_storage():
 
     # User can specify "enable-artifacts-buildcache" (boolean)
     yaml_obj = syaml.load(gitlab_ci_template.format(enable_artifacts))
-    jsonschema.validate(yaml_obj, gitlab_ci_schema)
+    jsonschema.validate(yaml_obj, ci_schema)
 
     # User can also specify "temporary-storage-url-prefix" (string)
     yaml_obj = syaml.load(gitlab_ci_template.format(temp_storage))
-    jsonschema.validate(yaml_obj, gitlab_ci_schema)
+    jsonschema.validate(yaml_obj, ci_schema)
 
     # However, specifying both should fail to validate
     yaml_obj = syaml.load(gitlab_ci_template.format(specify_both))
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(yaml_obj, gitlab_ci_schema)
+        jsonschema.validate(yaml_obj, ci_schema)
 
     # Specifying neither should be fine too, as neither of these properties
     # should be required
     yaml_obj = syaml.load(gitlab_ci_template.format(specify_neither))
-    jsonschema.validate(yaml_obj, gitlab_ci_schema)
+    jsonschema.validate(yaml_obj, ci_schema)
 
 
 def test_ci_generate_temp_storage_url(

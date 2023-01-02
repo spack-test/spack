@@ -1,0 +1,27 @@
+ci:
+  # Power runners override all of the linux defaults
+  mappings::
+  - match_behavior: first
+    matches:
+      - match:
+        - cuda
+        - dyninst
+        - hpx
+        - llvm
+        - llvm-amdgpu
+        - paraview
+        - precice
+        - rocblas
+        - rocsolver
+        - strumpack
+        - sundials
+        - trilinos
+        - vtk-h
+        - vtk-m
+        - warpx
+        build-job:
+          tags: ["spack", "public", "xlarge", "ppc64le"]
+      - match: ['@:']
+        build-job:
+          tags: ["spack", "public", "large", "ppc64le"]
+
