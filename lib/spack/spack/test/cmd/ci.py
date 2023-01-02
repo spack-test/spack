@@ -177,26 +177,27 @@ spack:
       - [$old-gcc-pkgs]
   mirrors:
     some-mirror: {0}
-  gitlab-ci:
+  ci:
     bootstrap:
       - name: bootstrap
         compiler-agnostic: true
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - arch=test-debian6-core2
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
       - match:
           - arch=test-debian6-m1
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
-    service-job-attributes:
-      image: donotcare
-      tags: [donotcare]
+    - cleanup-job:
+        image: donotcare
+        tags: [donotcare]
   cdash:
     build-group: Not important
     url: https://my.fake.cdash
@@ -280,19 +281,20 @@ spack:
     - dyninst%gcc@9.5
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     bootstrap:
       - name: bootstrap
         compiler-agnostic: true
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - arch=test-debian6-x86_64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - arch=test-debian6-aarch64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
 """
@@ -352,19 +354,20 @@ spack:
     - dyninst%gcc@9.5
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     bootstrap:
       - name: bootstrap
         compiler-agnostic: true
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - arch=test-debian6-x86_64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - arch=test-debian6-aarch64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
     enable-artifacts-buildcache: True
@@ -461,12 +464,13 @@ spack:
     - archive-files
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     enable-artifacts-buildcache: True
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - archive-files
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -519,11 +523,12 @@ spack:
     - archive-files
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
-    mappings:
+  ci:
+    pipeline-gen:
+    - submapping:
       - match:
           - archive-files
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           variables:
@@ -615,17 +620,18 @@ spack:
     - flatten-deps
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     enable-artifacts-buildcache: True
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - flatten-deps
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - dependency-install
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
 """
@@ -684,22 +690,23 @@ spack:
     - flatten-deps
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     enable-artifacts-buildcache: True
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - flatten-deps
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - dependency-install
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
-    service-job-attributes:
-      image: donotcare
-      tags: [donotcare]
+    - cleanup-job:
+        image: donotcare
+        tags: [donotcare]
     rebuild-index: False
 """
         )
@@ -745,12 +752,13 @@ spack:
     - externaltest
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
-    mappings:
+  ci:
+    pipeline-gen:
+    - submapping:
       - match:
           - archive-files
           - externaltest
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -827,17 +835,18 @@ spack:
     - $packages
   mirrors:
     test-mirror: {1}
-  gitlab-ci:
+  ci:
     broken-specs-url: {2}
     broken-tests-packages: {3}
     temporary-storage-url-prefix: {4}
-    mappings:
-     - match:
-         - {0}
-       runner-attributes:
-         tags:
-           - donotcare
-         image: donotcare
+    pipeline-gen:
+    - submapping:
+      - match:
+          - {0}
+        build-job:
+          tags:
+            - donotcare
+          image: donotcare
   cdash:
     build-group: Not important
     url: https://my.fake.cdash
@@ -1057,12 +1066,13 @@ spack:
    - $packages
  mirrors:
    test-mirror: {0}
- gitlab-ci:
+ ci:
    enable-artifacts-buildcache: True
-   mappings:
+   pipeline-gen:
+   - submapping:
      - match:
          - archive-files
-       runner-attributes:
+       build-job:
          tags:
            - donotcare
          image: donotcare
@@ -1148,18 +1158,19 @@ spack:
    - $packages
  mirrors:
    test-mirror: {0}
- gitlab-ci:
-   mappings:
+ ci:
+   pipeline-gen:
+   - submapping:
      - match:
          - patchelf
-       runner-attributes:
+       build-job:
          tags:
            - donotcare
          image: donotcare
-   service-job-attributes:
-     tags:
-       - nonbuildtag
-     image: basicimage
+   - cleanup-job:
+       tags:
+         - nonbuildtag
+       image: basicimage
 """.format(
         mirror_url
     )
@@ -1230,19 +1241,20 @@ spack:
    - $packages
  mirrors:
    test-mirror: {0}
- gitlab-ci:
+ ci:
    enable-artifacts-buildcache: True
-   mappings:
+   pipeline-gen:
+   - submapping:
      - match:
          - patchelf
-       runner-attributes:
+       build-job:
          tags:
            - donotcare
          image: donotcare
-   service-job-attributes:
-     tags:
-       - nonbuildtag
-     image: basicimage
+   - cleanup-job:
+       tags:
+         - nonbuildtag
+       image: basicimage
 """.format(
         mirror_url
     )
@@ -1392,25 +1404,12 @@ spack:
     - a
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
-    tags:
-      - toplevel
-      - toplevel2
-    variables:
-      ONE: toplevelvarone
-      TWO: toplevelvartwo
-    before_script:
-      - pre step one
-      - pre step two
-    script:
-      - main step
-    after_script:
-      - post step one
-    match_behavior: {0}
-    mappings:
+  ci:
+  - match_behavior: {0}
+    submapping:
       - match:
           - flatten-deps
-        runner-attributes:
+        build-job:
           tags:
             - specific-one
           variables:
@@ -1419,27 +1418,41 @@ spack:
           - dependency-install
       - match:
           - a
-        remove-attributes:
+        build-job-remove:
           tags:
             - toplevel2
-        runner-attributes:
+        build-job:
           tags:
             - specific-a
           variables:
             ONE: specificvarone
             TWO: specificvartwo
-          before_script:
-            - custom pre step one
-          script:
-            - custom main step
-          after_script:
+          before_script::
+            - - custom pre step one
+          script::
+            - - custom main step
+          after_script::
             - custom post step one
       - match:
           - a
-        runner-attributes:
+        build-job:
           tags:
             - specific-a-2
-    service-job-attributes:
+  - build-job:
+      tags:
+        - toplevel
+        - toplevel2
+      variables:
+        ONE: toplevelvarone
+        TWO: toplevelvartwo
+      before_script:
+        - - pre step one
+          - pre step two
+      script:
+        - - main step
+      after_script:
+        - - post step one
+  - cleanup-job:
       image: donotcare
       tags: [donotcare]
 """.format(
@@ -1542,10 +1555,11 @@ spack:
     - callpath%gcc@9.5
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
-    mappings:
+  ci:
+    pipline-gen:
+    - submapping:
       - match: ['%gcc@9.5']
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -1597,11 +1611,12 @@ spack:
    - callpath
  mirrors:
    test-mirror: {0}
- gitlab-ci:
-   mappings:
+ ci:
+   pipeline-gen:
+   - submapping:
      - match:
          - patchelf
-       runner-attributes:
+       build-job:
          tags:
            - donotcare
          image: donotcare
@@ -1689,29 +1704,30 @@ spack:
     - b%gcc@12.2.0
   mirrors:
     atestm: {0}
-  gitlab-ci:
+  ci:
     bootstrap:
       - name: bootstrap
         compiler-agnostic: true
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - arch=test-debian6-x86_64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - arch=test-debian6-core2
-        runner-attributes:
+        build-job:
           tags:
             - meh
       - match:
           - arch=test-debian6-aarch64
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
       - match:
           - arch=test-debian6-m1
-        runner-attributes:
+        build-job:
           tags:
             - meh
 """.format(
@@ -1804,11 +1820,12 @@ spack:
     - callpath
   mirrors:
     some-mirror: {0}
-  gitlab-ci:
-    mappings:
+  ci:
+    pipeline-gen:
+    - submappings:
       - match:
           - arch=test-debian6-core2
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -1857,11 +1874,12 @@ def test_ci_subcommands_without_mirror(
 spack:
   specs:
     - archive-files
-  gitlab-ci:
-    mappings:
+  ci:
+    pipeline-gen:
+    - submappings:
       - match:
           - archive-files
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -1890,12 +1908,13 @@ def test_ensure_only_one_temporary_storage():
     """Make sure 'gitlab-ci' section of env does not allow specification of
     both 'enable-artifacts-buildcache' and 'temporary-storage-url-prefix'."""
     gitlab_ci_template = """
-  gitlab-ci:
+  ci:
     {0}
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - notcheckedhere
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
 """
@@ -1947,12 +1966,13 @@ spack:
     - archive-files
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     temporary-storage-url-prefix: file:///work/temp/mirror
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - archive-files
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -2018,15 +2038,16 @@ spack:
     - a
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     broken-specs-url: "{0}"
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - a
           - flatten-deps
           - b
           - dependency-install
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
@@ -2067,26 +2088,27 @@ spack:
     - archive-files
   mirrors:
     some-mirror: https://my.fake.mirror
-  gitlab-ci:
+  ci:
     temporary-storage-url-prefix: file:///work/temp/mirror
-    mappings:
+    pipeline-gen:
+    - submapping:
       - match:
           - archive-files
-        runner-attributes:
+        build-job:
           tags:
             - donotcare
           image: donotcare
-    signing-job-attributes:
-      tags:
-        - nonbuildtag
-        - secretrunner
-      image:
-        name: customdockerimage
-        entrypoint: []
-      variables:
-        IMPORTANT_INFO: avalue
-      script:
-        - echo hello
+    - signing-job:
+        tags:
+          - nonbuildtag
+          - secretrunner
+        image:
+          name: customdockerimage
+          entrypoint: []
+        variables:
+          IMPORTANT_INFO: avalue
+        script::
+          - echo hello
 """
         )
 
@@ -2129,11 +2151,12 @@ spack:
    - $packages
  mirrors:
    test-mirror: file:///some/fake/mirror
- gitlab-ci:
-   mappings:
+ ci:
+   pipeline-gen:
+   - submapping:
      - match:
          - archive-files
-       runner-attributes:
+       build-job:
          tags:
            - donotcare
          image: {0}
