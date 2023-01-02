@@ -26,7 +26,7 @@ script_schema = {
                 "type": "array",
                 "items": {
                     "type": "string",
-                }
+                },
             },
         ],
     },
@@ -55,10 +55,7 @@ attributes_schema = {
                 },
             ],
         },
-        "tags": {
-            "type": "array",
-            "items": {"type": "string"}
-        },
+        "tags": {"type": "array", "items": {"type": "string"}},
         "variables": {
             "type": "object",
             "patternProperties": {
@@ -101,7 +98,7 @@ submapping_schema = {
                 },
             },
         },
-    }
+    },
 }
 
 named_attributes_schema = {
@@ -109,8 +106,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "noop-job": attributes_schema,
                 "noop-job-remove": attributes_schema,
             },
@@ -118,8 +114,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "build-job": attributes_schema,
                 "build-job-remove": attributes_schema,
             },
@@ -127,8 +122,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "reindex-job": attributes_schema,
                 "reindex-job-remove": attributes_schema,
             },
@@ -136,8 +130,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "signing-job": attributes_schema,
                 "signing-job-remove": attributes_schema,
             },
@@ -145,8 +138,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "cleanup-job": attributes_schema,
                 "cleanup-job-remove": attributes_schema,
             },
@@ -154,8 +146,7 @@ named_attributes_schema = {
         {
             "type": "object",
             "additionalProperties": False,
-            "properties":
-            {
+            "properties": {
                 "any-job": attributes_schema,
                 "any-job-remove": attributes_schema,
             },
@@ -170,7 +161,7 @@ pipeline_gen_schema = {
             submapping_schema,
             named_attributes_schema,
         ]
-    }
+    },
 }
 
 cdash_properties = {

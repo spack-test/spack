@@ -12,11 +12,11 @@ from llnl.util.lang import union_dicts
 
 import spack.schema.bootstrap
 import spack.schema.cdash
+import spack.schema.ci
 import spack.schema.compilers
 import spack.schema.concretizer
 import spack.schema.config
 import spack.schema.container
-import spack.schema.ci
 import spack.schema.mirrors
 import spack.schema.modules
 import spack.schema.packages

@@ -53,6 +53,7 @@ SHARED_PR_MIRROR_URL = "s3://spack-binaries-prs/shared_pr_mirror"
 spack_gpg = spack.main.SpackCommand("gpg")
 spack_compiler = spack.main.SpackCommand("compiler")
 
+
 class TemporaryDirectory(object):
     def __init__(self):
         self.temporary_directory = tempfile.mkdtemp()
@@ -514,7 +515,7 @@ def _unpack_script(script_section, op=_noop):
     return script
 
 
-class SpackCI():
+class SpackCI:
     def __init__(self, ci_config, phases, staged_phases):
         self.ci_config = ci_config
         self.named_jobs = [
@@ -526,12 +527,17 @@ class SpackCI():
             "signing",
         ]
 
-
         self.ir = {
             "jobs": {},
-            "temporary-storage-url-prefix": self.ci_config.get("temporary-storage-url-prefix",None),
-            "enable-artifacts-buildcache": self.ci_config.get("enable-artifacts-buildcache", False),
-            "bootstrap": self.ci_config.get("enable-artifacts-buildcache", []), # This is deprecated and should be removed
+            "temporary-storage-url-prefix": self.ci_config.get(
+                "temporary-storage-url-prefix", None
+            ),
+            "enable-artifacts-buildcache": self.ci_config.get(
+                "enable-artifacts-buildcache", False
+            ),
+            "bootstrap": self.ci_config.get(
+                "enable-artifacts-buildcache", []
+            ),  # This is deprecated and should be removed
             "rebuild-index": self.ci_config.get("enable-artifacts-buildcache", True),
             "broken-specs-url": self.ci_config.get("enable-artifacts-buildcache", None),
             "broken-tests-packages": self.ci_config.get("enable-artifacts-buildcache", []),
@@ -547,12 +553,8 @@ class SpackCI():
             if name not in ["any", "build"]:
                 jobs[name] = self.__init_job(None)
 
-
-    def __init_job(self,spec):
-        return {
-            "spec": spec,
-            "attributes": {}
-        }
+    def __init_job(self, spec):
+        return {"spec": spec, "attributes": {}}
 
     def __is_named(self, section):
         for _name in self.named_jobs:
@@ -576,13 +578,9 @@ class SpackCI():
                 if _spec_matches(spec, match_string):
                     matched = True
                     if "build-job-remove" in match_attrs:
-                        spack.config.remove_yaml(
-                            dest, match_attrs["build-job-remove"]
-                        )
+                        spack.config.remove_yaml(dest, attrs["build-job-remove"])
                     if "build-job" in match_attrs:
-                        spack.config.merge_yaml(
-                            dest, match_attrs["build-job"]
-                        )
+                        spack.config.merge_yaml(dest, attrs["build-job"])
                     break
             if matched and only_first:
                 break
@@ -598,9 +596,9 @@ class SpackCI():
             {
                 "build-job": {
                     "script:": [
-                      "cd {env_dir}",
-                      "spack env activate --without-view .",
-                      "spack ci rebuild",
+                        "cd {env_dir}",
+                        "spack env activate --without-view .",
+                        "spack ci rebuild",
                     ],
                 }
             },
@@ -620,7 +618,7 @@ class SpackCI():
             {
                 "cleanup-job": {
                     "script": [
-                        "spack -d mirror destroy --mirror-url {temp_mirror_prefix}/$CI_PIPELINE_ID",
+                        "spack -d mirror destroy --mirror-url {mirror_prefix}/$CI_PIPELINE_ID",
                     ]
                 }
             },
@@ -653,11 +651,9 @@ class SpackCI():
 
                 def _apply_section(attrs, section):
                     if do_remove:
-                        attrs = spack.config.remove_yaml(
-                            attrs, section[remove_job_name])
+                        attrs = spack.config.remove_yaml(attrs, section[remove_job_name])
                     if do_merge:
-                        attrs = spack.config.merge_yaml(
-                            attrs, section[merge_job_name])
+                        attrs = spack.config.merge_yaml(attrs, section[merge_job_name])
 
                 if name == "build":
                     # Apply attributes to all build jobs
@@ -677,7 +673,8 @@ class SpackCI():
                 for _, job in jobs.items():
                     if job["spec"]:
                         job["attributes"] = self.__apply_submapping(
-                            job["attributes"], job["spec"], section)
+                            job["attributes"], job["spec"], section
+                        )
 
         return self.ir
 
@@ -734,10 +731,12 @@ def generate_gitlab_ci_yaml(
     # Add config scopes to environment
     if True:
         env_includes = yaml_root.get("include", [])
-        cli_scopes = [os.path.abspath(s.path) for s in cfg.scopes().values()
-            if type(s) == cfg.ImmutableConfigScope and
-               s.path not in env_includes and
-               os.path.exists(s.path)
+        cli_scopes = [
+            os.path.abspath(s.path)
+            for s in cfg.scopes().values()
+            if type(s) == cfg.ImmutableConfigScope
+            and s.path not in env_includes
+            and os.path.exists(s.path)
         ]
         include_scopes = []
         for scope in cli_scopes:
@@ -745,7 +744,7 @@ def generate_gitlab_ci_yaml(
                 include_scopes.insert(0, scope)
         env_includes.extend(include_scopes)
         yaml_root["include"] = env_includes
-        with open(os.path.join(env.path,"spack.yaml"), "w") as fd:
+        with open(os.path.join(env.path, "spack.yaml"), "w") as fd:
             fd.write(syaml.dump_config(env.yaml, default_flow_style=False))
 
     # Get the joined "ci" config with all of the current scopes resolved
@@ -756,7 +755,7 @@ def generate_gitlab_ci_yaml(
 
     # Default target is gitlab...and only target is gitlab
     if "target" in ci_config and ci_config["target"] != "gitlab":
-        tty.die("Spack CI module only generates target \"gitlab\"")
+        tty.die('Spack CI module only generates target "gitlab"')
 
     cdash_handler = CDashHandler(ci_config.get("cdash")) if "cdash" in ci_config else None
     build_group = cdash_handler.build_group if cdash_handler else None
@@ -991,7 +990,6 @@ def generate_gitlab_ci_yaml(
         else:
             broken_spec_urls = web_util.list_url(broken_specs_url)
 
-
     # Make sure all reserved tags are removed for all jobs
     spack_ci = SpackCI(ci_config, phases, staged_phases)
     spack_ci_ir = spack_ci.generate_ir()
@@ -1056,7 +1054,6 @@ def generate_gitlab_ci_yaml(
 
                 if "script" not in runner_attribs:
                     raise AttributeError
-
 
                 def main_script_replacements(cmd):
                     return cmd.replace("{env_dir}", concrete_env_dir)
@@ -1346,14 +1343,12 @@ def generate_gitlab_ci_yaml(
 
             cleanup_job["script"] = _unpack_script(
                 cleanup_job["script"],
-                op=lambda cmd : cmd.replace("temp_mirror_prefix", temp_storage_url_prefix))
+                op=lambda cmd: cmd.replace("mirror_prefix", temp_storage_url_prefix),
+            )
 
             output_object["cleanup"] = cleanup_job
 
-        if (
-            "signing-job" in ci_config
-            and spack_pipeline_type == "spack_protected_branch"
-        ):
+        if "signing-job" in ci_config and spack_pipeline_type == "spack_protected_branch":
             # External signing: generate a job to check and sign binary pkgs
             stage_names.append("stage-sign-pkgs")
             signing_job = spack_ci_ir["jobs"]["signing"]["attributes"]
@@ -1377,7 +1372,8 @@ def generate_gitlab_ci_yaml(
             final_job["stage"] = "stage-rebuild-index"
             final_job["script"] = _unpack_script(
                 final_job["script"],
-                op=lambda cmd : cmd.replace("{index_target_mirror}", index_target_mirror))
+                op=lambda cmd: cmd.replace("{index_target_mirror}", index_target_mirror),
+            )
             final_job["when"] = "always"
             final_job["retry"] = service_job_retries
             final_job["interruptible"] = True

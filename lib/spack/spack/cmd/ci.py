@@ -631,10 +631,7 @@ def ci_rebuild(args):
     )
     reports_dir = fs.join_path(os.getcwd(), "cdash_report")
     if args.tests and broken_tests:
-        tty.warn(
-            "Unable to run stand-alone tests since listed in "
-            "ci's 'broken-tests-packages'"
-        )
+        tty.warn("Unable to run stand-alone tests since listed in " "ci's 'broken-tests-packages'")
         if cdash_handler:
             msg = "Package is listed in ci's broken-tests-packages"
             cdash_handler.report_skipped(job_spec, reports_dir, reason=msg)

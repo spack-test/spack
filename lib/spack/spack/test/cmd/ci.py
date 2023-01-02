@@ -28,8 +28,8 @@ import spack.util.gpg
 import spack.util.spack_yaml as syaml
 import spack.util.url as url_util
 from spack.schema.buildcache_spec import schema as specfile_schema
-from spack.schema.database_index import schema as db_idx_schema
 from spack.schema.ci import schema as ci_schema
+from spack.schema.database_index import schema as db_idx_schema
 from spack.spec import CompilerSpec, Spec
 from spack.util.pattern import Bunch
 
