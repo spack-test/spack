@@ -11,6 +11,27 @@
 
 from llnl.util.lang import union_dicts
 
+# Schema for script fields
+# List of lists and/or strings
+# This is similar to what is allowed in
+# the gitlab schema
+script_schema = {
+    "type": "array",
+    "items": {
+        "anyOf": [
+            {
+                "type": "string",
+            },
+            {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                }
+            },
+        ],
+    },
+}
+
 # Additional attributes are allow
 # and will be forwarded directly to the
 # CI target YAML for each job.
@@ -46,9 +67,9 @@ attributes_schema = {
                 },
             },
         },
-        "before_script": {"type": "string"},
-        "script": {"type": "string"},
-        "after_script": {"type": "string"},
+        "before_script": script_schema,
+        "script": script_schema,
+        "after_script": script_schema,
     },
 }
 

@@ -498,6 +498,22 @@ def _build_jobs(phases, staged_phases):
                 yield release_spec, release_spec_dag_hash
 
 
+def _noop(x):
+    return x
+
+
+def _unpack_script(script_section, op=_noop):
+    script = []
+    for cmd in script_section:
+        if isinstance(cmd, list):
+            for subcmd in cmd:
+                script.append(op(subcmd))
+        else:
+            script.append(op(cmd))
+
+    return script
+
+
 class SpackCI():
     def __init__(self, ci_config, phases, staged_phases):
         self.ci_config = ci_config
@@ -581,13 +597,13 @@ class SpackCI():
         defaults = [
             {
                 "build-job": {
-                    "script": """
-                      - cd {env_dir}
-                      - spack env activate --without-view .
-                      - spack ci rebuild
-                    """
+                    "script:": [
+                      "cd {env_dir}",
+                      "spack env activate --without-view .",
+                      "spack ci rebuild",
+                    ],
                 }
-            }
+            },
         ]
 
         # Job overrides
@@ -595,14 +611,17 @@ class SpackCI():
             # Configurable reindex script
             {
                 "reindex-job": {
-                    "script": "- spack buildcache update-index --keys -d {index_target_mirror}",
+                    "script": [
+                        "spack buildcache update-index --keys -d {index_target_mirror}",
+                    ],
                 }
             },
             # Configurable cleanup script
             {
                 "cleanup-job": {
-                    "script":
-                        "- spack -d mirror destroy --mirror-url {temp_mirror_prefix}/$CI_PIPELINE_ID"
+                    "script": [
+                        "spack -d mirror destroy --mirror-url {temp_mirror_prefix}/$CI_PIPELINE_ID",
+                    ]
                 }
             },
             # Add signing job tags
@@ -644,23 +663,11 @@ class SpackCI():
                     # Apply attributes to all build jobs
                     for _, job in jobs.items():
                         if job["spec"]:
-                            if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
-                                print("Applyng build")
-                                print("  sec:        ", section)
-                                print("  att:        ", job["attributes"])
                             _apply_section(job["attributes"], section)
-                            if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
-                                print("  att-merged: ", job["attributes"])
                 elif name == "any":
                     # Apply section attributes too all jobs
                     for _, job in jobs.items():
-                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
-                            print("Applyng any")
-                            print("  sec:        ", section)
-                            print("  att:        ", job["attributes"])
                         _apply_section(job["attributes"], section)
-                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
-                            print("  att-merged: ", job["attributes"])
                 else:
                     # Apply attributes to named job
                     _apply_section(jobs[name]["attributes"], section)
@@ -669,9 +676,6 @@ class SpackCI():
                 # Apply section jobs with specs to match
                 for _, job in jobs.items():
                     if job["spec"]:
-                        if _ == "irzq2isl6uow2mbdqwzcd4xncnsqrnfo":
-                            print("Applyng submapping")
-                            print(job["attributes"], section)
                         job["attributes"] = self.__apply_submapping(
                             job["attributes"], job["spec"], section)
 
@@ -930,7 +934,7 @@ def generate_gitlab_ci_yaml(
     try:
         bindist.binary_index.update()
     except bindist.FetchCacheError as e:
-        tty.error(e)
+        tty.warn(e)
 
     staged_phases = {}
     try:
@@ -1050,24 +1054,22 @@ def generate_gitlab_ci_yaml(
                     except AttributeError:
                         image_name = build_image
 
-                if "script" in runner_attribs:
-                    job_script = [s for s in syaml.load(runner_attribs["script"])]
-                else:
-                    job_script = ["spack env activate --without-view ."]
+                if "script" not in runner_attribs:
+                    raise AttributeError
 
-                    if artifacts_root:
-                        job_script.insert(0, "cd {0}".format(concrete_env_dir))
 
-                    job_script.extend(["spack ci rebuild"])
+                def main_script_replacements(cmd):
+                    return cmd.replace("{env_dir}", concrete_env_dir)
 
+                job_script = _unpack_script(runner_attribs["script"], op=main_script_replacements)
 
                 before_script = None
                 if "before_script" in runner_attribs:
-                    before_script = [s for s in syaml.load(runner_attribs["before_script"])]
+                    before_script = _unpack_script(runner_attribs["before_script"])
 
                 after_script = None
                 if "after_script" in runner_attribs:
-                    after_script = [s for s in syaml.load(runner_attribs["after_script"])]
+                    after_script = _unpack_script(runner_attribs["after_script"])
 
                 osname = str(release_spec.architecture)
                 job_name = get_job_name(
@@ -1342,7 +1344,9 @@ def generate_gitlab_ci_yaml(
             cleanup_job["retry"] = service_job_retries
             cleanup_job["interruptible"] = True
 
-            cleanup_job["script"].format_map({"temp_mirror_prefix", temp_storage_url_prefix})
+            cleanup_job["script"] = _unpack_script(
+                cleanup_job["script"],
+                op=lambda cmd : cmd.replace("temp_mirror_prefix", temp_storage_url_prefix))
 
             output_object["cleanup"] = cleanup_job
 
@@ -1371,7 +1375,9 @@ def generate_gitlab_ci_yaml(
                 index_target_mirror = remote_mirror_override
 
             final_job["stage"] = "stage-rebuild-index"
-            final_job["script"].format_map({"index_target_mirror": index_target_mirror})
+            final_job["script"] = _unpack_script(
+                final_job["script"],
+                op=lambda cmd : cmd.replace("{index_target_mirror}", index_target_mirror))
             final_job["when"] = "always"
             final_job["retry"] = service_job_retries
             final_job["interruptible"] = True
