@@ -1,0 +1,5 @@
+packages:
+  all:
+    # CI should never build develop/main/master versions of
+    # packages.
+    require: "@:999999999"
