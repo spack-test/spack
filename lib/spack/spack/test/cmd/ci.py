@@ -198,11 +198,11 @@ spack:
     - cleanup-job:
         image: donotcare
         tags: [donotcare]
-  cdash:
-    build-group: Not important
-    url: https://my.fake.cdash
-    project: Not used
-    site: Nothing
+    cdash:
+      build-group: Not important
+      url: https://my.fake.cdash
+      project: Not used
+      site: Nothing
 """.format(
                 mirror_url
             )
@@ -474,11 +474,11 @@ spack:
           tags:
             - donotcare
           image: donotcare
-  cdash:
-    build-group: Not important
-    url: https://my.fake.cdash
-    project: Not used
-    site: Nothing
+    cdash:
+      build-group: Not important
+      url: https://my.fake.cdash
+      project: Not used
+      site: Nothing
 """
         )
 
@@ -847,11 +847,11 @@ spack:
           tags:
             - donotcare
           image: donotcare
-  cdash:
-    build-group: Not important
-    url: https://my.fake.cdash
-    project: Not used
-    site: Nothing
+    cdash:
+      build-group: Not important
+      url: https://my.fake.cdash
+      project: Not used
+      site: Nothing
 """.format(
         pkg_name, mirror_url, broken_specs_url, broken_tests_packages, temp_storage_url
     )
@@ -1822,7 +1822,7 @@ spack:
     some-mirror: {0}
   ci:
     pipeline-gen:
-    - submappings:
+    - submapping:
       - match:
           - arch=test-debian6-core2
         build-job:
@@ -1876,7 +1876,7 @@ spack:
     - archive-files
   ci:
     pipeline-gen:
-    - submappings:
+    - submapping:
       - match:
           - archive-files
         build-job:

@@ -610,7 +610,7 @@ class SpackCI:
             {
                 "reindex-job": {
                     "script": [
-                        "spack buildcache update-index --keys -d {index_target_mirror}",
+                        "spack buildcache update-index --keys --mirror-url {index_target_mirror}",
                     ],
                 }
             },
