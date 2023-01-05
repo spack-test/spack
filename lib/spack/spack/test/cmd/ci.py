@@ -297,6 +297,9 @@ spack:
         build-job:
           tags:
             - donotcare
+    - any-job:
+        tags:
+          - donotcare
 """
         )
 
@@ -370,6 +373,9 @@ spack:
         build-job:
           tags:
             - donotcare
+    - any-job:
+        tags:
+        - donotcare
     enable-artifacts-buildcache: True
 """
         )
@@ -431,7 +437,7 @@ spack:
 """
         )
 
-    expect_out = 'Error: Environment yaml does not have "gitlab-ci" section'
+    expect_out = 'Error: Environment yaml does not have "ci" section'
 
     with tmpdir.as_cwd():
         env_cmd("create", "test", "./spack.yaml")
@@ -794,7 +800,7 @@ spack:
         env_cmd("create", "test", "./spack.yaml")
         env_cmd("activate", "--without-view", "--sh", "test")
         out = ci_cmd("rebuild", fail_on_error=False)
-        assert "env containing gitlab-ci" in out
+        assert "env containing ci" in out
 
         env_cmd("deactivate")
 
@@ -1255,6 +1261,10 @@ spack:
        tags:
          - nonbuildtag
        image: basicimage
+   - any-job:
+       tags:
+         - nonbuildtag
+       image: basicimage
 """.format(
         mirror_url
     )
@@ -1405,56 +1415,57 @@ spack:
   mirrors:
     some-mirror: https://my.fake.mirror
   ci:
-  - match_behavior: {0}
-    submapping:
-      - match:
-          - flatten-deps
-        build-job:
-          tags:
-            - specific-one
-          variables:
-            THREE: specificvarthree
-      - match:
-          - dependency-install
-      - match:
-          - a
-        build-job-remove:
-          tags:
-            - toplevel2
-        build-job:
-          tags:
-            - specific-a
-          variables:
-            ONE: specificvarone
-            TWO: specificvartwo
-          before_script::
-            - - custom pre step one
-          script::
-            - - custom main step
-          after_script::
-            - custom post step one
-      - match:
-          - a
-        build-job:
-          tags:
-            - specific-a-2
-  - build-job:
-      tags:
-        - toplevel
-        - toplevel2
-      variables:
-        ONE: toplevelvarone
-        TWO: toplevelvartwo
-      before_script:
-        - - pre step one
-          - pre step two
-      script:
-        - - main step
-      after_script:
-        - - post step one
-  - cleanup-job:
-      image: donotcare
-      tags: [donotcare]
+    pipeline-gen:
+    - match_behavior: {0}
+      submapping:
+        - match:
+            - flatten-deps
+          build-job:
+            tags:
+              - specific-one
+            variables:
+              THREE: specificvarthree
+        - match:
+            - dependency-install
+        - match:
+            - a
+          build-job-remove:
+            tags:
+              - toplevel2
+          build-job:
+            tags:
+              - specific-a
+            variables:
+              ONE: specificvarone
+              TWO: specificvartwo
+            before_script::
+              - - custom pre step one
+            script::
+              - - custom main step
+            after_script::
+              - custom post step one
+        - match:
+            - a
+          build-job:
+            tags:
+              - specific-a-2
+    - build-job:
+        tags:
+          - toplevel
+          - toplevel2
+        variables:
+          ONE: toplevelvarone
+          TWO: toplevelvartwo
+        before_script:
+          - - pre step one
+            - pre step two
+        script:
+          - - main step
+        after_script:
+          - - post step one
+    - cleanup-job:
+        image: donotcare
+        tags: [donotcare]
 """.format(
                 match_behavior
             )
@@ -1556,7 +1567,7 @@ spack:
   mirrors:
     some-mirror: https://my.fake.mirror
   ci:
-    pipline-gen:
+    pipeline-gen:
     - submapping:
       - match: ['%gcc@9.5']
         build-job:
