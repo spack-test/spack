@@ -13,6 +13,7 @@ import jsonschema
 import pytest
 
 from llnl.util.filesystem import mkdirp, working_dir
+import llnl.util.tty as tty
 
 import spack
 import spack.binary_distribution
@@ -152,6 +153,7 @@ def test_ci_generate_with_env(
     mock_packages,
     ci_base_environment,
     mock_binary_index,
+    capsys,
 ):
     """Make sure we can get a .gitlab-ci.yml from an environment file
     which has the gitlab-ci, cdash, and mirrors sections."""
@@ -198,6 +200,8 @@ spack:
     - cleanup-job:
         image: donotcare
         tags: [donotcare]
+    - reindex-job:
+        script: [hello, world]
     cdash:
       build-group: Not important
       url: https://my.fake.cdash
@@ -211,8 +215,9 @@ spack:
         env_cmd("create", "test", "./spack.yaml")
         outputfile = str(tmpdir.join(".gitlab-ci.yml"))
 
-        with ev.read("test"):
-            ci_cmd("generate", "--output-file", outputfile)
+        with capsys.disabled():
+            with ev.read("test"):
+                ci_cmd("generate", "--output-file", outputfile)
 
         with open(outputfile) as f:
             contents = f.read()
@@ -230,6 +235,13 @@ spack:
 
             assert "rebuild-index" in yaml_contents
             rebuild_job = yaml_contents["rebuild-index"]
+            with capsys.disabled():
+                print("Summary...")
+                print(rebuild_job)
+                print("Keys...")
+                for key in rebuild_job:
+                    print(key)
+
             expected = "spack buildcache update-index --keys --mirror-url {0}".format(mirror_url)
             assert rebuild_job["script"][0] == expected
 
@@ -932,10 +944,9 @@ def activate_rebuild_env(tmpdir, pkg_name, rebuild_env):
 @pytest.mark.parametrize("broken_tests", [True, False])
 def test_ci_rebuild_mock_success(
     tmpdir,
-    config,
     working_env,
     mutable_mock_env_path,
-    install_mockery,
+    install_mockery_mutable_config,
     mock_gnupghome,
     mock_stage,
     mock_fetch,
@@ -972,7 +983,7 @@ def test_ci_rebuild(
     tmpdir,
     working_env,
     mutable_mock_env_path,
-    install_mockery,
+    install_mockery_mutable_config,
     mock_packages,
     monkeypatch,
     mock_gnupghome,
@@ -1491,8 +1502,6 @@ spack:
             assert global_vars["SPACK_CHECKOUT_VERSION"] == "12ad69eb1"
 
             for ci_key in yaml_contents.keys():
-                if "(specs) b" in ci_key:
-                    assert False
                 if "(specs) a" in ci_key:
                     # Make sure a's attributes override variables, and all the
                     # scripts.  Also, make sure the 'toplevel' tag doesn't

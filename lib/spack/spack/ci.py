@@ -551,7 +551,7 @@ class SpackCI:
         for name in self.named_jobs:
             # Skip the special named jobs
             if name not in ["any", "build"]:
-                jobs[name] = self.__init_job(None)
+                jobs[name] = self.__init_job("")
 
     def __init_job(self, spec):
         return {"spec": spec, "attributes": {}}
@@ -614,6 +614,11 @@ class SpackCI:
                     ],
                 }
             },
+            {
+                "reindex-job": {
+                    "script": "",
+                },
+            },
             # Configurable cleanup script
             {
                 "cleanup-job": {
@@ -641,7 +646,9 @@ class SpackCI:
         for section in reversed(pipeline_gen):
             name = self.__is_named(section)
             has_submapping = "submapping" in section
+            print("pre: ", section)
             section = cfg.InternalConfigScope._process_dict_keyname_overrides(section)
+            print("post: ", section)
 
             if name:
                 remove_job_name = self.__job_name(name, suffix="-remove")
@@ -675,6 +682,10 @@ class SpackCI:
                         job["attributes"] = self.__apply_submapping(
                             job["attributes"], job["spec"], section
                         )
+
+        for _, job in jobs.items():
+            if job["spec"]:
+                job["spec"] = job["spec"].name
 
         return self.ir
 
@@ -993,6 +1004,9 @@ def generate_gitlab_ci_yaml(
     # Make sure all reserved tags are removed for all jobs
     spack_ci = SpackCI(ci_config, phases, staged_phases)
     spack_ci_ir = spack_ci.generate_ir()
+
+    with open("spack_ci_ir.txt", "w") as f:
+        f.write(json.dumps(spack_ci_ir))
 
     before_script, after_script = None, None
     for phase in phases:
@@ -1348,10 +1362,12 @@ def generate_gitlab_ci_yaml(
 
             output_object["cleanup"] = cleanup_job
 
-        if "signing-job" in ci_config and spack_pipeline_type == "spack_protected_branch":
+        if "script" in spack_ci_ir["jobs"]["signing"] and spack_pipeline_type == "spack_protected_branch":
             # External signing: generate a job to check and sign binary pkgs
             stage_names.append("stage-sign-pkgs")
             signing_job = spack_ci_ir["jobs"]["signing"]["attributes"]
+
+            signing_job["script"] = _unpack_script(signing_job["script"])
 
             signing_job["stage"] = "stage-sign-pkgs"
             signing_job["when"] = "always"
@@ -1368,7 +1384,6 @@ def generate_gitlab_ci_yaml(
             index_target_mirror = mirror_urls[0]
             if remote_mirror_override:
                 index_target_mirror = remote_mirror_override
-
             final_job["stage"] = "stage-rebuild-index"
             final_job["script"] = _unpack_script(
                 final_job["script"],
@@ -1436,6 +1451,9 @@ def generate_gitlab_ci_yaml(
             with open(copy_specs_file, "w") as fd:
                 fd.write(json.dumps(buildcache_copies))
 
+        with open("output_object", "w") as outf:
+            outf.write(syaml.dump_config(output_object, default_flow_style=False))
+
         sorted_output = {}
         for output_key, output_value in sorted(output_object.items()):
             sorted_output[output_key] = output_value
@@ -1473,7 +1491,7 @@ def generate_gitlab_ci_yaml(
             sys.exit(1)
 
     with open(output_file, "w") as outf:
-        outf.write(syaml.dump_config(sorted_output, default_flow_style=True))
+        outf.write(syaml.dump_config(sorted_output, default_flow_style=False))
 
 
 def _url_encode_string(input_string):
