@@ -13,7 +13,6 @@ import jsonschema
 import pytest
 
 from llnl.util.filesystem import mkdirp, working_dir
-import llnl.util.tty as tty
 
 import spack
 import spack.binary_distribution

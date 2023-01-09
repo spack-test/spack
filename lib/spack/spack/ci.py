@@ -516,13 +516,12 @@ def _unpack_script(script_section, op=_noop):
 
 
 class SpackCI:
-    """ Spack CI object used to generate intermediate representation
+    """Spack CI object used to generate intermediate representation
     used by the CI generator(s).
     """
 
-
     def __init__(self, ci_config, phases, staged_phases):
-        """ Given the information from the ci section of the config
+        """Given the information from the ci section of the config
         and the job phases setup meta data needed for generating Spack
         CI IR.
         """
@@ -564,12 +563,11 @@ class SpackCI:
                 jobs[name] = self.__init_job("")
 
     def __init_job(self, spec):
-        """ Initialize job object
-        """
+        """Initialize job object"""
         return {"spec": spec, "attributes": {}}
 
     def __is_named(self, section):
-        """ Check if a pipeline-gen configuration section is for a named job,
+        """Check if a pipeline-gen configuration section is for a named job,
         and if so return the name otherwise return none.
         """
         for _name in self.named_jobs:
@@ -589,14 +587,13 @@ class SpackCI:
         jname = name
         if suffix:
             jname = "{0}-job{1}".format(name, suffix)
-        else
+        else:
             jname = "{0}-job".format(name)
 
         return jname
 
     def __apply_submapping(self, dest, spec, section):
-        """Apply submapping setion to the IR dict
-        """
+        """Apply submapping setion to the IR dict"""
         matched = False
         only_first = section.get("match_behavior", "first") == "first"
 
@@ -617,8 +614,7 @@ class SpackCI:
 
     # Generate IR from the configs
     def generate_ir(self):
-        """Generate the IR from the Spack CI configurations.
-        """
+        """Generate the IR from the Spack CI configurations."""
 
         jobs = self.ir["jobs"]
 
