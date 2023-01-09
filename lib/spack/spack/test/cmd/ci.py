@@ -315,9 +315,9 @@ spack:
         )
 
     needs_graph = {
-        "(bootstrap) conflict": [],
+        # "(bootstrap) conflict": [],
         "(bootstrap) gcc": [
-            "(bootstrap) conflict",
+            # "(bootstrap) conflict",
         ],
         "(specs) libelf": [
             "(bootstrap) gcc",
@@ -392,22 +392,22 @@ spack:
         )
 
     needs_graph = {
-        "(bootstrap) conflict": [],
+        # "(bootstrap) conflict": [],
         "(bootstrap) gcc": [
-            "(bootstrap) conflict",
+            # "(bootstrap) conflict",
         ],
         "(specs) libelf": [
             "(bootstrap) gcc",
-            "(bootstrap) conflict",
+            # "(bootstrap) conflict",
         ],
         "(specs) libdwarf": [
             "(bootstrap) gcc",
-            "(bootstrap) conflict",
+            # "(bootstrap) conflict",
             "(specs) libelf",
         ],
         "(specs) dyninst": [
             "(bootstrap) gcc",
-            "(bootstrap) conflict",
+            # "(bootstrap) conflict",
             "(specs) libelf",
             "(specs) libdwarf",
         ],
