@@ -1470,7 +1470,7 @@ spack:
         before_script:
           - - pre step one
             - pre step two
-        script:
+        script::
           - - main step
         after_script:
           - - post step one
@@ -1842,13 +1842,10 @@ spack:
     some-mirror: {0}
   ci:
     pipeline-gen:
-    - submapping:
-      - match:
-          - arch=test-debian6-core2
-        build-job:
-          tags:
-            - donotcare
-          image: donotcare
+    - build-job:
+        tags:
+          - donotcare
+        image: donotcare
 """.format(
                 mirror_url
             )

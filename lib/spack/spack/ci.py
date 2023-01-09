@@ -1362,7 +1362,7 @@ def generate_gitlab_ci_yaml(
 
             output_object["cleanup"] = cleanup_job
 
-        if "script" in spack_ci_ir["jobs"]["signing"] and spack_pipeline_type == "spack_protected_branch":
+        if "script" in spack_ci_ir["jobs"]["signing"]["attributes"] and spack_pipeline_type == "spack_protected_branch":
             # External signing: generate a job to check and sign binary pkgs
             stage_names.append("stage-sign-pkgs")
             signing_job = spack_ci_ir["jobs"]["signing"]["attributes"]
