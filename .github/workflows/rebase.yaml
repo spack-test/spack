@@ -1,0 +1,35 @@
+name: Rebase on spack/spack develop
+on:
+  # Run once a day, or on request
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+jobs:
+  rebase:
+    name: Rebase the spack-test/spack repo on spack/spack develop branch
+    runs-on: ubuntu-latest
+    env:
+      GIT_AUTHOR_NAME: "spackbot"
+      GIT_AUTHOR_EMAIL: "noreply@spack.io"
+      GIT_COMMITTER_NAME: "spackbot"
+      GIT_COMMITTER_EMAIL: "noreply@spack.io"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.SPACK_TEST_PUSH_TOKEN }}
+
+      - name: Add spack/spack repo as a remote and fetch
+        run: |
+          git remote add upstream https://github.com/spack/spack.git
+          git fetch --force --tags upstream
+
+      - name: Rebase current branch on spack/spack develop
+        run: git rebase upstream/develop
+
+      - name: Force push rebased branch + tags
+        run: |
+          git push origin --tags --force
+          git push origin --force
