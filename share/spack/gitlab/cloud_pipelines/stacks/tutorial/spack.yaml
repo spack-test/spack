@@ -44,10 +44,13 @@ spack:
       - [py-scipy^openblas, armadillo^openblas, netlib-lapack, openmpi, mpich, elpa^mpich]
       - ['%gcc@12.1.0']
   specs:
-  - $gcc_system_packages
-  - $gcc_old_packages
-  - $clang_packages
-  - $gcc_spack_built_packages
+  # - $gcc_system_packages
+  # - $gcc_old_packages
+  # - $clang_packages
+  # - $gcc_spack_built_packages
+    - matrix:
+      - - readline
+      - ['%gcc@11.3.0']
 
   ci:
     pipeline-gen:

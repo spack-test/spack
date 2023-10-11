@@ -106,6 +106,9 @@ spack:
     - mpich
     - libfabric
 
+  - test_specs:
+    - readline
+
   - compiler:
     - '%gcc@7.3.1'
 
@@ -116,18 +119,23 @@ spack:
 
   specs:
 
-  - matrix:
-    - - $app_specs
-    - - $compiler
-    - - $target
+  # - matrix:
+  #   - - $app_specs
+  #   - - $compiler
+  #   - - $target
+
+  # - matrix:
+  #   - - $lib_specs
+  #   - - $compiler
+  #   - - $target
+
+  # - matrix:
+  #   - - $compiler_specs
+  #   - - $compiler
+  #   - - $target
 
   - matrix:
-    - - $lib_specs
-    - - $compiler
-    - - $target
-
-  - matrix:
-    - - $compiler_specs
+    - - $test_specs
     - - $compiler
     - - $target
 

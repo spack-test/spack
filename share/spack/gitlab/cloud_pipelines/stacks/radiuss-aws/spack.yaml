@@ -31,6 +31,9 @@ spack:
     - umpire
     - umpire +cuda
 
+  - test:
+    - readline
+
   - compiler:
     - '%gcc@7.3.1'
 
@@ -39,8 +42,13 @@ spack:
 
   specs:
 
+  # - matrix:
+  #   - - $radiuss
+  #   - - $compiler
+  #   - - $target
+
   - matrix:
-    - - $radiuss
+    - - $test
     - - $compiler
     - - $target
 

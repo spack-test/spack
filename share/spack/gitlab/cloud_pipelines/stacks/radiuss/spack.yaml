@@ -40,9 +40,15 @@ spack:
       - xbraid
       - zfp
 
+    - test:
+      - readline
+
   specs:
+  # - matrix:
+  #   - [$radiuss]
+  #   - [$compilers]
   - matrix:
-    - [$radiuss]
+    - [$test]
     - [$compilers]
 
   cdash:

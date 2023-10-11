@@ -76,7 +76,7 @@ default:
     PROTECTED_MIRROR_PUSH_DOMAIN: "s3://spack-binaries"
     PIPELINE_MIRROR_TEMPLATE: "single-src-protected-mirrors.yaml.in"
     # TODO: We can remove this when we drop the "deprecated" stack
-    PUSH_BUILDCACHE_DEPRECATED: "s3://spack-binaries/${CI_COMMIT_REF_NAME}/${SPACK_CI_STACK_NAME}"
+    PUSH_BUILDCACHE_DEPRECATED: "s3://spack-binaries/testing/${CI_COMMIT_REF_NAME}/${SPACK_CI_STACK_NAME}"
 
   rules:
     - if: $CI_COMMIT_REF_NAME == "develop"
@@ -84,7 +84,7 @@ default:
       when: always
       variables:
         SPACK_PIPELINE_TYPE: "spack_protected_branch"
-        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/${CI_COMMIT_REF_NAME}"
+        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/testing/${CI_COMMIT_REF_NAME}"
         SPACK_REQUIRE_SIGNING: "True"
         AWS_ACCESS_KEY_ID: ${PROTECTED_MIRRORS_AWS_ACCESS_KEY_ID}
         AWS_SECRET_ACCESS_KEY: ${PROTECTED_MIRRORS_AWS_SECRET_ACCESS_KEY}
@@ -94,7 +94,7 @@ default:
       when: always
       variables:
         SPACK_PIPELINE_TYPE: "spack_protected_branch"
-        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/${CI_COMMIT_REF_NAME}"
+        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/testing/${CI_COMMIT_REF_NAME}"
         SPACK_PRUNE_UNTOUCHED: "False"
         SPACK_PRUNE_UP_TO_DATE: "False"
         SPACK_REQUIRE_SIGNING: "True"
@@ -106,7 +106,7 @@ default:
       when: always
       variables:
         SPACK_PIPELINE_TYPE: "spack_copy_only"
-        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/${CI_COMMIT_REF_NAME}"
+        SPACK_COPY_BUILDCACHE: "s3://spack-binaries/testing/${CI_COMMIT_REF_NAME}"
         PIPELINE_MIRROR_TEMPLATE: "copy-only-protected-mirrors.yaml.in"
         AWS_ACCESS_KEY_ID: ${PROTECTED_MIRRORS_AWS_ACCESS_KEY_ID}
         AWS_SECRET_ACCESS_KEY: ${PROTECTED_MIRRORS_AWS_SECRET_ACCESS_KEY}
@@ -117,7 +117,7 @@ default:
       variables:
         SPACK_PIPELINE_TYPE: "spack_pull_request"
         # TODO: We can remove this when we drop the "deprecated" stack
-        PUSH_BUILDCACHE_DEPRECATED: "s3://spack-binaries-prs/${CI_COMMIT_REF_NAME}/${SPACK_CI_STACK_NAME}"
+        PUSH_BUILDCACHE_DEPRECATED: "s3://spack-binaries-prs/testing/${CI_COMMIT_REF_NAME}/${SPACK_CI_STACK_NAME}"
         SPACK_PRUNE_UNTOUCHED: "True"
         SPACK_PRUNE_UNTOUCHED_DEPENDENT_DEPTH: "1"
         # TODO: Change sync script to include target in branch name.  Then we could
@@ -236,7 +236,7 @@ protected-publish:
     max: 2
     when: ["runner_system_failure", "stuck_or_timeout_failure"]
   variables:
-    SPACK_COPY_BUILDCACHE: "s3://spack-binaries/${CI_COMMIT_REF_NAME}"
+    SPACK_COPY_BUILDCACHE: "s3://spack-binaries/testing/${CI_COMMIT_REF_NAME}"
     SPACK_PIPELINE_TYPE: "spack_protected_branch"
     AWS_ACCESS_KEY_ID: ${PROTECTED_MIRRORS_AWS_ACCESS_KEY_ID}
     AWS_SECRET_ACCESS_KEY: ${PROTECTED_MIRRORS_AWS_SECRET_ACCESS_KEY}
@@ -705,20 +705,20 @@ ml-linux-x86_64-rocm-build:
   variables:
     SPACK_CI_STACK_NAME: ml-darwin-aarch64-mps
 
-ml-darwin-aarch64-mps-generate:
-  tags: [ "macos-ventura", "apple-clang-14", "aarch64-macos" ]
-  extends: [ ".ml-darwin-aarch64-mps", ".generate-base"]
+# ml-darwin-aarch64-mps-generate:
+#   tags: [ "macos-ventura", "apple-clang-14", "aarch64-macos" ]
+#   extends: [ ".ml-darwin-aarch64-mps", ".generate-base"]
 
-ml-darwin-aarch64-mps-build:
-  extends: [ ".ml-darwin-aarch64-mps", ".build" ]
-  trigger:
-    include:
-      - artifact: jobs_scratch_dir/cloud-ci-pipeline.yml
-        job: ml-darwin-aarch64-mps-generate
-    strategy: depend
-  needs:
-    - artifacts: True
-      job: ml-darwin-aarch64-mps-generate
+# ml-darwin-aarch64-mps-build:
+#   extends: [ ".ml-darwin-aarch64-mps", ".build" ]
+#   trigger:
+#     include:
+#       - artifact: jobs_scratch_dir/cloud-ci-pipeline.yml
+#         job: ml-darwin-aarch64-mps-generate
+#     strategy: depend
+#   needs:
+#     - artifacts: True
+#       job: ml-darwin-aarch64-mps-generate
 
 ########################################
 # Deprecated CI testing

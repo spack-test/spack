@@ -49,14 +49,15 @@ spack:
 
   specs:
     # Test ParaView and VisIt builds with different GL backends
-  - matrix:
-    - [$sdk_base_spec]
-    - ["+paraview ~visit"]
-    - [$^paraview_specs]
-  - matrix:
-    - [$sdk_base_spec]
-    - ["~paraview +visit"]
-    - [$^visit_specs]
+  # - matrix:
+  #   - [$sdk_base_spec]
+  #   - ["+paraview ~visit"]
+  #   - [$^paraview_specs]
+  # - matrix:
+  #   - [$sdk_base_spec]
+  #   - ["~paraview +visit"]
+  #   - [$^visit_specs]
+    - readline
 
   ci:
     pipeline-gen:
