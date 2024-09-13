@@ -73,8 +73,8 @@ install_compilers() {
     # in packages.yaml files and add a fallback `%gcc` version for each application.
     if [ -f "/bootstrap-compilers/spack/etc/spack/compilers.yaml" ]; then
         # Running inside a gitlab CI container
-        # Intel and gcc@12 compiler are pre-installed and their location is known in 
-        cp /bootstrap-compilers/spack/etc/spack/compilers.yaml "${SPACK_ROOT}"/etc/spack/
+        # Intel and gcc@12 compiler are pre-installed and their location is known in
+        spack compiler list
     else
         spack compiler add --scope site
         # We need to treat compilers as essentially external, i.e. their installation location
