@@ -36,6 +36,8 @@ class PkgA(AutotoolsPackage):
     depends_on("pkg-b", when="foobar=bar")
     depends_on("test-dependency", type="test")
 
+    depends_on("c", type="build")
+
     parallel = False
 
 
