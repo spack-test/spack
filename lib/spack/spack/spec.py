@@ -3442,6 +3442,10 @@ class Spec:
         if cleardeps:
             self._dependents = _EdgeMap(store_by_child=False)
             self._dependencies = _EdgeMap(store_by_child=True)
+
+        if hasattr(other, "compiler_annotation"):
+            self.compiler_annotation = other.compiler_annotation
+
         self.compiler_flags = other.compiler_flags.copy()
         self.compiler_flags.spec = self
         self.variants = other.variants.copy()
