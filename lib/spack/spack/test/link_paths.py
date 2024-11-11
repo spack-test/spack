@@ -8,6 +8,7 @@ import sys
 
 import pytest
 
+import spack.compilers.libraries
 import spack.paths
 from spack.compilers.libraries import parse_non_system_link_dirs
 

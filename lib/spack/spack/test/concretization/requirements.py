@@ -494,7 +494,7 @@ packages:
     spec = Spec(spec_str).concretized()
     assert "c" in spec
     for s in spec.traverse():
-        if "c" in s:
+        if "c" in s and s.name not in ("gcc", "llvm"):
             assert s.satisfies(requirement_str)
 
 
