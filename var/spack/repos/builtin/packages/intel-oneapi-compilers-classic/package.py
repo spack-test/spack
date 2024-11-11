@@ -109,3 +109,27 @@ class IntelOneapiCompilersClassic(Package, CompilerPackage):
                 link_tree.merge(dest_path)
             else:
                 os.symlink(src_path, dest_path)
+
+    @property
+    def cc(self):
+        msg = "cannot retrieve C compiler [spec is not concrete]"
+        assert self.spec.concrete, msg
+        if self.spec.external:
+            return self.spec.extra_attributes["compilers"].get("c", None)
+        raise NotImplementedError("FIXME (compiler as nodes): missing spack installed package")
+
+    @property
+    def cxx(self):
+        msg = "cannot retrieve C++ compiler [spec is not concrete]"
+        assert self.spec.concrete, msg
+        if self.spec.external:
+            return self.spec.extra_attributes["compilers"].get("cxx", None)
+        raise NotImplementedError("FIXME (compiler as nodes): missing spack installed package")
+
+    @property
+    def fortran(self):
+        msg = "cannot retrieve Fortran compiler [spec is not concrete]"
+        assert self.spec.concrete, msg
+        if self.spec.external:
+            return self.spec.extra_attributes["compilers"].get("fortran", None)
+        raise NotImplementedError("FIXME (compiler as nodes): missing spack installed package")
