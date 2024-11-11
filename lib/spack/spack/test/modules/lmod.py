@@ -111,7 +111,7 @@ class TestLmod:
         self, factory, module_configuration, compiler_factory
     ):
         with spack.config.override(
-            "compilers", [compiler_factory(spec="clang@3.3", operating_system="debian6")]
+            "packages", {"llvm": {"externals": [compiler_factory(spec="llvm@3.3")]}}
         ):
             module_configuration("complex_hierarchy")
             module, spec = factory("intel-oneapi-compilers%clang@3.3")
@@ -119,7 +119,7 @@ class TestLmod:
             provides = module.conf.provides
 
             assert "compiler" in provides
-            assert provides["compiler"] == spack.spec.CompilerSpec("oneapi@=3.0")
+            assert provides["compiler"] == spack.spec.Spec("intel-oneapi-compilers@=3.0")
 
     def test_simple_case(self, modulefile_content, module_configuration):
         """Tests the generation of a simple Lua module file."""
@@ -138,7 +138,7 @@ class TestLmod:
         module_configuration("autoload_direct")
         content = modulefile_content(mpileaks_spec_string)
 
-        assert len([x for x in content if "depends_on(" in x]) == 2
+        assert len([x for x in content if "depends_on(" in x]) == 3
 
     def test_autoload_all(self, modulefile_content, module_configuration):
         """Tests the automatic loading of all dependencies."""
@@ -146,7 +146,7 @@ class TestLmod:
         module_configuration("autoload_all")
         content = modulefile_content(mpileaks_spec_string)
 
-        assert len([x for x in content if "depends_on(" in x]) == 5
+        assert len([x for x in content if "depends_on(" in x]) == 6
 
     def test_alter_environment(self, modulefile_content, module_configuration):
         """Tests modifications to run-time environment."""
@@ -264,7 +264,7 @@ class TestLmod:
         module_configuration("exclude")
         content = modulefile_content(mpileaks_spec_string)
 
-        assert len([x for x in content if "depends_on(" in x]) == 1
+        assert len([x for x in content if "depends_on(" in x]) == 2
 
     def test_no_hash(self, factory, module_configuration):
         """Makes sure that virtual providers (in the hierarchy) always
@@ -371,7 +371,7 @@ class TestLmod:
         module_configuration("missing_core_compilers")
 
         # Our mock paths must be detected as system paths
-        monkeypatch.setattr(spack.util.environment, "SYSTEM_DIRS", ["/path/to"])
+        monkeypatch.setattr(spack.util.environment, "SYSTEM_DIRS", ["/path/bin"])
 
         # We don't want to really write into user configuration
         # when running tests
@@ -433,7 +433,7 @@ class TestLmod:
     ):
         with ev.create_in_dir(str(tmpdir), with_view=True) as e:
             module_configuration("with_view")
-            install("--add", "cmake")
+            install("--fake", "--add", "cmake")
 
             spec = spack.spec.Spec("cmake").concretized()
 

@@ -256,7 +256,7 @@ mpileaks:
         # make sure this doesn't give us an external first.
         spec = Spec("mpi")
         spec.concretize()
-        assert not spec["mpi"].external
+        assert not spec.external and spec.package.provides("mpi")
 
         # load config
         conf = syaml.load_config(
@@ -292,7 +292,7 @@ mpich:
 
         spec = Spec("mpi")
         spec.concretize()
-        assert not spec["mpi"].external
+        assert not spec.external and spec.package.provides("mpi")
 
         # load config
         conf = syaml.load_config(
