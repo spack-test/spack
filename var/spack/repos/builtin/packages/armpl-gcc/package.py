@@ -5,7 +5,6 @@
 
 import os
 
-import spack.error
 import spack.platforms
 from spack.package import *
 
@@ -407,6 +406,9 @@ class ArmplGcc(Package):
     provides("lapack")
     provides("fftw-api@3")
 
+    depends_on("c", type="build")
+    requires("^[virtuals=c] gcc", msg="armpl-gcc is only compatible with the GCC compiler")
+
     # Run the installer with the desired install directory
     def install(self, spec, prefix):
         if spec.platform == "darwin":
@@ -430,8 +432,6 @@ class ArmplGcc(Package):
                 # Unmount image
                 hdiutil("detach", mountpoint)
             return
-        if self.compiler.name != "gcc":
-            raise spack.error.SpackError(("Only compatible with GCC.\n"))
 
         with when("@:22"):
             armpl_version = spec.version.up_to(3).string.split("_")[0]

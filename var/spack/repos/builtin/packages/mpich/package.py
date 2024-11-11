@@ -7,7 +7,7 @@ import os
 import re
 import sys
 
-import spack.compilers
+import spack.compilers.config
 from spack.build_environment import dso_suffix
 from spack.package import *
 
@@ -334,7 +334,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     @classmethod
     def determine_variants(cls, exes, version):
         def get_spack_compiler_spec(compiler):
-            spack_compilers = spack.compilers.find_compilers([os.path.dirname(compiler)])
+            spack_compilers = spack.compilers.config.find_compilers([os.path.dirname(compiler)])
             actual_compiler = None
             # check if the compiler actually matches the one we want
             for spack_compiler in spack_compilers:
