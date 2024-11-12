@@ -287,11 +287,9 @@ def test_package_fetcher_fails():
 
 
 def test_package_test_no_compilers(mock_packages, monkeypatch, capfd):
-    def compilers(compiler, arch_spec):
-        return None
-
-    monkeypatch.setattr(spack.compilers.config, "compilers_for_spec", compilers)
-
+    """Ensures that a test which needs the compiler, and build dependencies, to run, is skipped
+    if no compiler is available.
+    """
     s = spack.spec.Spec("pkg-a")
     pkg = BaseTestPackage(s)
     pkg.test_requires_compiler = True

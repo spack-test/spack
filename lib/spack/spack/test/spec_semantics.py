@@ -858,21 +858,18 @@ class TestSpecSemantics:
         package_segments = [
             ("{NAME}", "", "name", lambda spec: spec),
             ("{VERSION}", "", "version", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{compiler}", "", "compiler", lambda spec: spec),
+            ("{compiler}", "", "compiler", lambda spec: spec),
             ("{compiler_flags}", "", "compiler_flags", lambda spec: spec),
             ("{variants}", "", "variants", lambda spec: spec),
             ("{architecture}", "", "architecture", lambda spec: spec),
             ("{@VERSIONS}", "@", "versions", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{%compiler}", "%", "compiler", lambda spec: spec),
+            ("{%compiler}", "%", "compiler", lambda spec: spec),
             ("{arch=architecture}", "arch=", "architecture", lambda spec: spec),
             ("{namespace=namespace}", "namespace=", "namespace", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{compiler.name}", "", "name", lambda spec: spec.compiler),
-            # ("{compiler.version}", "", "version", lambda spec: spec.compiler),
-            # ("{%compiler.name}", "%", "name", lambda spec: spec.compiler),
-            # ("{@compiler.version}", "@", "version", lambda spec: spec.compiler),
+            ("{compiler.name}", "", "name", lambda spec: spec.compiler),
+            ("{compiler.version}", "", "version", lambda spec: spec.compiler),
+            ("{%compiler.name}", "%", "name", lambda spec: spec.compiler),
+            ("{@compiler.version}", "@", "version", lambda spec: spec.compiler),
             ("{architecture.platform}", "", "platform", lambda spec: spec.architecture),
             ("{architecture.os}", "", "os", lambda spec: spec.architecture),
             ("{architecture.target}", "", "target", lambda spec: spec.architecture),
@@ -1512,17 +1509,17 @@ class TestSpecSemantics:
         ("git-test@git.foo/bar", "{name}-{version}", str(pathlib.Path("git-test-git.foo_bar"))),
         ("git-test@git.foo/bar", "{name}-{version}-{/hash}", None),
         ("git-test@git.foo/bar", "{name}/{version}", str(pathlib.Path("git-test", "git.foo_bar"))),
-        # FIXME (compiler as nodes): revisit these tests
-        # (
-        #     "git-test@{0}=1.0%gcc".format("a" * 40),
-        #     "{name}/{version}/{compiler}",
-        #     str(pathlib.Path("git-test", "{0}_1.0".format("a" * 40), "gcc")),
-        # ),
-        # (
-        #     "git-test@git.foo/bar=1.0%gcc",
-        #     "{name}/{version}/{compiler}",
-        #     str(pathlib.Path("git-test", "git.foo_bar_1.0", "gcc")),
-        # ),
+        # {compiler} is 'none' if a package does not depend on C, C++, or Fortran
+        (
+            f"git-test@{'a' * 40}=1.0%gcc",
+            "{name}/{version}/{compiler}",
+            str(pathlib.Path("git-test", f"{'a' * 40}_1.0", "none")),
+        ),
+        (
+            "git-test@git.foo/bar=1.0%gcc",
+            "{name}/{version}/{compiler}",
+            str(pathlib.Path("git-test", "git.foo_bar_1.0", "none")),
+        ),
     ],
 )
 def test_spec_format_path(spec_str, format_str, expected, mock_git_test_package):
