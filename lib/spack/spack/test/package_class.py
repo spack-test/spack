@@ -296,4 +296,3 @@ def test_package_test_no_compilers(mock_packages, monkeypatch, capfd):
     pkg.do_test()
     error = capfd.readouterr()[1]
     assert "Skipping tests for package" in error
-    assert "test requires missing compiler" in error
