@@ -1181,7 +1181,8 @@ class TestConcretize:
         s = Spec("conditional-provider +disable-v1").concretized()
         assert "v1-provider" in s
         assert s["v1"].name == "v1-provider"
-        assert s["v2"].name == "conditional-provider"
+        assert s.package.provides("v2")
+        assert "v2" not in s
 
     @pytest.mark.regression("20079")
     @pytest.mark.parametrize(
