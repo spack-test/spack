@@ -858,21 +858,18 @@ class TestSpecSemantics:
         package_segments = [
             ("{NAME}", "", "name", lambda spec: spec),
             ("{VERSION}", "", "version", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{compiler}", "", "compiler", lambda spec: spec),
+            ("{compiler}", "", "compiler", lambda spec: spec),
             ("{compiler_flags}", "", "compiler_flags", lambda spec: spec),
             ("{variants}", "", "variants", lambda spec: spec),
             ("{architecture}", "", "architecture", lambda spec: spec),
             ("{@VERSIONS}", "@", "versions", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{%compiler}", "%", "compiler", lambda spec: spec),
+            ("{%compiler}", "%", "compiler", lambda spec: spec),
             ("{arch=architecture}", "arch=", "architecture", lambda spec: spec),
             ("{namespace=namespace}", "namespace=", "namespace", lambda spec: spec),
-            # FIXME (compiler as nodes): recover this semantic
-            # ("{compiler.name}", "", "name", lambda spec: spec.compiler),
-            # ("{compiler.version}", "", "version", lambda spec: spec.compiler),
-            # ("{%compiler.name}", "%", "name", lambda spec: spec.compiler),
-            # ("{@compiler.version}", "@", "version", lambda spec: spec.compiler),
+            ("{compiler.name}", "", "name", lambda spec: spec.compiler),
+            ("{compiler.version}", "", "version", lambda spec: spec.compiler),
+            ("{%compiler.name}", "%", "name", lambda spec: spec.compiler),
+            ("{@compiler.version}", "@", "version", lambda spec: spec.compiler),
             ("{architecture.platform}", "", "platform", lambda spec: spec.architecture),
             ("{architecture.os}", "", "os", lambda spec: spec.architecture),
             ("{architecture.target}", "", "target", lambda spec: spec.architecture),
