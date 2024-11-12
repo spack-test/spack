@@ -2742,7 +2742,7 @@ class SpackSolverSetup:
                                 arg = ast_sym(ast_sym(term.atom).arguments[0])
                                 symbol = AspFunction(name)(arg.string)
                                 self.assumptions.append((parse_term(str(symbol)), True))
-                                self.gen.asp_problem.append(f"{symbol}.\n")
+                                self.gen.asp_problem.append(f"{{ {symbol} }}.\n")
 
         path = os.path.join(parent_dir, "concretize.lp")
         parse_files([path], visit)
@@ -3160,20 +3160,30 @@ class RequirementParser:
         self, pkg_name: str, *, constraint: spack.spec.Spec, kind: RequirementKind
     ) -> bool:
         """Returns True if a requirement constraint should be rejected"""
-        if kind == RequirementKind.DEFAULT:
-            # Requirements under all: are applied only if they are satisfiable considering only
-            # package rules, so e.g. variants must exist etc. Otherwise, they are rejected.
-            try:
-                s = spack.spec.Spec(pkg_name)
-                s.constrain(constraint)
-                s.validate_or_raise()
-            except spack.error.SpackError as e:
-                tty.debug(
-                    f"[SETUP] Rejecting the default '{constraint}' requirement "
-                    f"on '{pkg_name}': {str(e)}",
-                    level=2,
-                )
-                return True
+        # If it's a specific package requirement, it's never rejected
+        if kind != RequirementKind.DEFAULT:
+            return False
+
+        # Reject default requirements for runtimes and compilers
+        if pkg_name in spack.repo.PATH.packages_with_tags("runtime"):
+            return True
+
+        if pkg_name in spack.repo.PATH.packages_with_tags("compiler"):
+            return True
+
+        # Requirements under all: are applied only if they are satisfiable considering only
+        # package rules, so e.g. variants must exist etc. Otherwise, they are rejected.
+        try:
+            s = spack.spec.Spec(pkg_name)
+            s.constrain(constraint)
+            s.validate_or_raise()
+        except spack.error.SpackError as e:
+            tty.debug(
+                f"[SETUP] Rejecting the default '{constraint}' requirement "
+                f"on '{pkg_name}': {str(e)}",
+                level=2,
+            )
+            return True
         return False
 
 
