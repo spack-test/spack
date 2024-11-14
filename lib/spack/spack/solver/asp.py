@@ -29,7 +29,6 @@ import spack
 import spack.binary_distribution
 import spack.compilers.config
 import spack.compilers.flags
-import spack.concretize
 import spack.config
 import spack.deptypes as dt
 import spack.environment as ev
@@ -2767,13 +2766,13 @@ class SpackSolverSetup:
                     "libc",
                     when=f"%{compiler.name}@{compiler.versions}",
                     type="link",
-                    description="Add libc",
+                    description=f"Add libc when using {compiler}",
                 )
                 recorder("*").depends_on(
                     str(current_libc),
                     when=f"%{compiler.name}@{compiler.versions}",
                     type="link",
-                    description="Add libc",
+                    description=f"Libc is {current_libc} when using {compiler}",
                 )
 
         recorder.consume_facts()
