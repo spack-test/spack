@@ -16,6 +16,7 @@ import llnl.util.tty as tty
 from llnl.util.lang import classproperty, memoized
 
 import spack.compilers.libraries
+import spack.config
 import spack.package_base
 import spack.paths
 import spack.util.executable
@@ -218,6 +219,19 @@ class CompilerPackage(spack.package_base.PackageBase):
             env.set(wrapper_var_name, str(wrapper_path))
             env.set(f"SPACK_{wrapper_var_name}_RPATH_ARG", self.rpath_arg)
 
+            uarch = dependent_spec.architecture.target
+            version_number, _ = archspec.cpu.version_components(
+                self.spec.version.dotted_numeric_string
+            )
+            try:
+                isa_arg = uarch.optimization_flags(self.spec.name, version_number)
+            except (ValueError, archspec.cpu.UnsupportedMicroarchitecture):
+                isa_arg = ""
+
+            if isa_arg:
+                env.set(f"SPACK_TARGET_ARGS_{attr_name.upper()}", isa_arg)
+
+        # FIXME (compiler as nodes): make these paths language specific
         env.set("SPACK_LINKER_ARG", self.linker_arg)
 
         paths = _implicit_rpaths(pkg=self)
@@ -233,16 +247,6 @@ class CompilerPackage(spack.package_base.PackageBase):
             env.set("SPACK_DTAGS_TO_ADD", self.enable_new_dtags)
 
         spec = self.spec
-        uarch = dependent_spec.architecture.target
-        version_number, _ = archspec.cpu.version_components(spec.version.dotted_numeric_string)
-        try:
-            isa_arg = uarch.optimization_flags(spec.name, version_number)
-        except (ValueError, archspec.cpu.UnsupportedMicroarchitecture):
-            isa_arg = ""
-
-        if isa_arg:
-            env.set("SPACK_TARGET_ARGS", isa_arg)
-
         env.set("SPACK_COMPILER_SPEC", spec.format("{name}{@version}{variants}{/hash:7}"))
 
         if spec.extra_attributes:
