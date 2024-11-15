@@ -15,12 +15,12 @@ from llnl.util.filesystem import HeaderList, LibraryList
 
 import spack.build_environment
 import spack.build_systems.compiler
-import spack.compilers
 import spack.config
 import spack.deptypes as dt
 import spack.package_base
 import spack.paths
 import spack.spec
+import spack.util.environment
 import spack.util.spack_yaml as syaml
 from spack.build_environment import UseMode, _static_to_shared_library, dso_suffix
 from spack.context import Context
@@ -795,11 +795,11 @@ def test_optimization_flags_are_using_node_target(default_mock_concretization, m
     """
     monkeypatch.setattr(spack.build_systems.compiler, "_implicit_rpaths", lambda pkg: [])
     gcc = default_mock_concretization("gcc target=core2")
-    mpileaks = default_mock_concretization("gcc target=x86_64")
+    mpileaks = default_mock_concretization("mpileaks target=x86_64")
 
     env = EnvironmentModifications()
     gcc.package.setup_dependent_build_environment(env, mpileaks)
-    actions = env.group_by_name()["SPACK_TARGET_ARGS"]
+    actions = env.group_by_name()["SPACK_TARGET_ARGS_CC"]
 
     assert len(actions) == 1 and isinstance(actions[0], spack.util.environment.SetEnv)
     assert actions[0].value == "-march=x86-64 -mtune=generic"
