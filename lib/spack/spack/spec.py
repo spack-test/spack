@@ -82,6 +82,7 @@ import spack.platforms
 import spack.provider_index
 import spack.repo
 import spack.solver
+import spack.spec
 import spack.store
 import spack.traverse as traverse
 import spack.util.executable
@@ -594,7 +595,7 @@ class ArchSpec:
         return string in str(self) or string in self.target
 
     def complete_with_defaults(self) -> None:
-        default_architecture = spack.spec.ArchSpec.default_arch()
+        default_architecture = ArchSpec.default_arch()
         if not self.platform:
             self.platform = default_architecture.platform
 
@@ -667,7 +668,8 @@ class DeprecatedCompilerSpec(lang.DeprecatedProperty):
             deps = instance.dependencies(virtuals=language)
             if deps:
                 return CompilerSpec(deps[0])
-        return CompilerSpec(Spec())
+
+        raise AttributeError(f"{instance} has no C, C++, or Fortran compiler")
 
 
 @lang.lazy_lexicographic_ordering
@@ -1386,13 +1388,13 @@ def tree(
 class SpecAnnotations:
     def __init__(self) -> None:
         self.original_spec_format = SPECFILE_FORMAT_VERSION
-        self.compiler_node_attribute: Optional["spack.spec.Spec"] = None
+        self.compiler_node_attribute: Optional["Spec"] = None
 
     def with_spec_format(self, spec_format: int) -> "SpecAnnotations":
         self.original_spec_format = spec_format
         return self
 
-    def with_compiler(self, compiler: "spack.spec.Spec") -> "SpecAnnotations":
+    def with_compiler(self, compiler: "Spec") -> "SpecAnnotations":
         self.compiler_node_attribute = compiler
         return self
 
@@ -2945,7 +2947,7 @@ class Spec:
         for spec in self.traverse():
             spec._cached_hash(ht.dag_hash)
 
-    def concretized(self, tests: Union[bool, Iterable[str]] = False) -> "spack.spec.Spec":
+    def concretized(self, tests: Union[bool, Iterable[str]] = False) -> "Spec":
         """This is a non-destructive version of concretize().
 
         First clones, then returns a concrete version of this package
@@ -3952,6 +3954,9 @@ class Spec:
                     try:
                         current = getattr(current, part)
                     except AttributeError:
+                        if part == "compiler":
+                            return "none"
+
                         raise SpecFormatStringError(
                             f"Attempted to format attribute {attribute}. "
                             f"Spec {'.'.join(parts[:idx])} has no attribute {part}"
