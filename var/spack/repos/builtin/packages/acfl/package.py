@@ -361,6 +361,8 @@ class Acfl(Package, CompilerPackage):
     provides("c", "cxx")
     provides("fortran")
 
+    requires("platform=linux", msg="acfl is only available for linux")
+
     # Licensing - Not required from 22.0.1 on.
 
     # Run the installer with the desired install directory
