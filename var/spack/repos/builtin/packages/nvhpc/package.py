@@ -438,9 +438,7 @@ class Nvhpc(Package, CompilerPackage):
         if pkg:
             version(ver, sha256=pkg[0], url=pkg[1])
 
-    depends_on("c", type="build")  # generated
-    depends_on("cxx", type="build")  # generated
-    depends_on("fortran", type="build")  # generated
+    depends_on("gcc languages=c,c++,fortran", type="run")
 
     variant("blas", default=True, description="Enable BLAS")
     variant(
@@ -460,8 +458,6 @@ class Nvhpc(Package, CompilerPackage):
     provides("blas", when="+blas")
     provides("lapack", when="+lapack")
     provides("mpi", when="+mpi")
-
-    requires("%gcc", msg="nvhpc must be installed with %gcc")
 
     provides("c", "cxx")
     provides("fortran")
@@ -526,11 +522,11 @@ class Nvhpc(Package, CompilerPackage):
 
         makelocalrc_args = [
             "-gcc",
-            self.compiler.cc,
+            self["gcc"].cc,
             "-gpp",
-            self.compiler.cxx,
+            self["gcc"].cxx,
             "-g77",
-            self.compiler.f77,
+            self["gcc"].fortran,
             "-x",
             compilers_bin,
         ]
