@@ -194,6 +194,13 @@ class CompilerPackage(spack.package_base.PackageBase):
     def setup_dependent_build_environment(self, env, dependent_spec):
         # FIXME (compiler as nodes): check if this is good enough or should be made more general
 
+        # The package is not used as a compiler, so skip this setup
+        if not any(
+            lang in dependent_spec and dependent_spec[lang].name == self.spec.name
+            for lang in ("c", "cxx", "fortran")
+        ):
+            return
+
         # Populate an object with the list of environment modifications and return it
         link_dir = pathlib.Path(spack.paths.build_env_path)
 
