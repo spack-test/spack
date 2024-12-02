@@ -753,9 +753,7 @@ def generate_gitlab_ci_yaml(
                 tty.debug("affected pkgs:")
                 for p in affected_pkgs:
                     tty.debug(f"  {p}")
-                affected_specs = get_spec_filter_list(
-                    env, affected_pkgs, dependent_traverse_depth=dependent_depth
-                )
+                affected_specs = get_spec_filter_list(env, affected_pkgs, dependent_traverse_depth=dependent_depth)
                 tty.debug("all affected specs:")
                 for s in affected_specs:
                     tty.debug(f"  {s.name}/{s.dag_hash()[:7]}")
