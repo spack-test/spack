@@ -15,6 +15,8 @@ import archspec.cpu
 import llnl.util.tty as tty
 from llnl.util.lang import classproperty, memoized
 
+import spack
+import spack.compilers.error
 import spack.compilers.libraries
 import spack.config
 import spack.package_base
@@ -167,12 +169,13 @@ class CompilerPackage(spack.package_base.PackageBase):
     def standard_flag(self, *, language: str, standard: str) -> str:
         """Returns the flag used to enforce a given standard for a language"""
         if language not in self.supported_languages:
-            # FIXME (compiler as nodes): Use UnsupportedCompilerFlag ?
-            raise RuntimeError(f"{self.spec} does not provide the '{language}' language")
+            raise spack.compilers.error.UnsupportedCompilerFlag(
+                f"{self.spec} does not provide the '{language}' language"
+            )
         try:
             return self._standard_flag(language=language, standard=standard)
         except (KeyError, RuntimeError) as e:
-            raise RuntimeError(
+            raise spack.compilers.error.UnsupportedCompilerFlag(
                 f"{self.spec} does not provide the '{language}' standard {standard}"
             ) from e
 
