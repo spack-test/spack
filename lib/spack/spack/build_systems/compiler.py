@@ -235,7 +235,7 @@ class CompilerPackage(spack.package_base.PackageBase):
                 self.spec.version.dotted_numeric_string
             )
             try:
-                isa_arg = uarch.optimization_flags(self.spec.name, version_number)
+                isa_arg = uarch.optimization_flags(self.archspec_name(), version_number)
             except (ValueError, archspec.cpu.UnsupportedMicroarchitecture):
                 isa_arg = ""
 
@@ -285,6 +285,10 @@ class CompilerPackage(spack.package_base.PackageBase):
 
         for item in env_paths:
             env.prepend_path("SPACK_ENV_PATH", item)
+
+    def archspec_name(self) -> str:
+        """Name that archspec uses to refer to this compiler"""
+        return self.spec.name
 
 
 def _implicit_rpaths(pkg: spack.package_base.PackageBase) -> List[str]:
