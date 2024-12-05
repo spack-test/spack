@@ -597,6 +597,9 @@ class IntelOneapiCompilers(IntelOneApiPackage, CompilerPackage):
             if find(p, "*." + dso_suffix, recursive=False):
                 yield p
 
+    def archspec_name(self):
+        return "oneapi"
+
     @classmethod
     def determine_variants(cls, exes, version_str):
         variant, extra_attributes = super().determine_variants(exes, version_str)
