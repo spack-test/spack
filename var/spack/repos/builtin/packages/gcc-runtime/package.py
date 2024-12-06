@@ -48,9 +48,9 @@ class GccRuntime(Package):
 
     # libgfortran ABI
     provides("fortran-rt", "libgfortran")
-    provides("libgfortran@3", when="%gcc@:6")
-    provides("libgfortran@4", when="%gcc@7")
-    provides("libgfortran@5", when="%gcc@8:")
+    provides("libgfortran@3", when="@:6")
+    provides("libgfortran@4", when="@7")
+    provides("libgfortran@5", when="@8:")
 
     depends_on("libc", type="link", when="platform=linux")
 
