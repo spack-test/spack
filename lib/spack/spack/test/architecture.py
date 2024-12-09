@@ -7,7 +7,6 @@ import pytest
 
 import archspec.cpu
 
-import spack.concretize
 import spack.operating_systems
 import spack.platforms
 from spack.spec import ArchSpec, Spec
@@ -132,6 +131,5 @@ def test_concretize_target_ranges(root_target_range, dep_target_range, result, m
     spec = Spec(
         f"pkg-a %gcc@10 foobar=bar target={root_target_range} ^pkg-b target={dep_target_range}"
     )
-    with spack.concretize.disable_compiler_existence_check():
-        spec.concretize()
+    spec.concretize()
     assert spec.target == spec["pkg-b"].target == result
