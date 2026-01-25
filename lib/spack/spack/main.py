@@ -1120,6 +1120,7 @@ def main(argv=None):
 
     """
     try:
+        print("Running spack-test/spack::main")
         return _main(argv)
 
     except spack.solver.asp.OutputDoesNotSatisfyInputError as e:
